@@ -9,6 +9,15 @@ const VentaRepository = {
         return await dbQuery(sql);
     },
 
+    async obtenerPorId(ventaId) {
+        const sql = `
+        select v.*, c.nombre as cliente_nombre
+        from ventas v join clientes c on v.cliente_id = c.id
+        where v.id = ?`;
+        const rows = await dbQuery(sql, [ventaId]);
+        return rows[0] || null;
+    },
+
     async obtenerDetallePorVentaId(ventaId) {
         const sql = `
         select dv.precio_unitario, dv.cantidad, p.nombre as producto_nombre

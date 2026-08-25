@@ -5,10 +5,12 @@ export const obtenerVentas = async () => {
     return respuesta.data;
 };
 
-
 export const crearVenta = async (datosVenta) => {
     const respuesta = await axiosInstancia.post('/ventas', datosVenta);
     return respuesta.data;
 };
 
-
+export const obtenerVentaPorId = async (id) => {
+    const respuesta = await axiosInstancia.get(`/ventas/${id}`);
+    return respuesta.data;
+};

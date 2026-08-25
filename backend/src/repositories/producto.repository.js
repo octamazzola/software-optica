@@ -18,6 +18,11 @@ const ProductoRepository = {
         return rows[0] || null;
     },
 
+    async obtenerPorId(id) {
+        const rows = await dbQuery('SELECT * FROM productos WHERE id = ?', [id]);
+        return rows[0] || null;
+    },
+
     async crear({ codigo, nombre, precio, descripcion }) {
         const sql = `
             INSERT INTO productos (codigo, nombre, precio, descripcion) 

@@ -16,3 +16,7 @@ export const eliminarCliente = async (id) => {
     return respuesta.data;
 };
 
+export const actualizarCliente = async (id, datosCliente) => {
+    const respuesta = await axiosInstancia.put(`/clientes/${id}`, datosCliente);
+    return respuesta.data;
+};

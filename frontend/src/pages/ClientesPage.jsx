@@ -1,33 +1,34 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  obtenerProductos,
-  crearProducto,
-  actualizarProducto,
-  eliminarProducto,
-} from '../api/productos.api';
+  obtenerClientes,
+  crearCliente,
+  actualizarCliente,
+  eliminarCliente,
+} from '../api/clientes.api';
 
-const FORM_VACIO = { codigo: '', nombre: '', descripcion: '', precio: '' };
+const FORM_VACIO = { nombre: '', telefono: '', email: '' };
 
-export default function ProductosPage() {
-  const [productos, setProductos] = useState([]);
+export default function ClientesPage() {
+  const [clientes, setClientes] = useState([]);
   const [buscar, setBuscar] = useState('');
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [exito, setExito] = useState(null);
 
+  // Modal estado
   const [modalAbierto, setModalAbierto] = useState(false);
-  const [editando, setEditando] = useState(null);
+  const [editando, setEditando] = useState(null); // null = alta, object = edición
   const [form, setForm] = useState(FORM_VACIO);
   const [guardando, setGuardando] = useState(false);
 
   const cargar = useCallback(async () => {
     try {
       setCargando(true);
-      const data = await obtenerProductos(buscar);
-      setProductos(data);
+      const data = await obtenerClientes(buscar);
+      setClientes(data);
       setError(null);
     } catch {
-      setError('No se pudo cargar la lista de productos.');
+      setError('No se pudo cargar la lista de clientes.');
     } finally {
       setCargando(false);
     }
@@ -49,14 +50,9 @@ export default function ProductosPage() {
     setModalAbierto(true);
   };
 
-  const abrirEdicion = (producto) => {
-    setEditando(producto);
-    setForm({
-      codigo: producto.codigo,
-      nombre: producto.nombre,
-      descripcion: producto.descripcion || '',
-      precio: producto.precio,
-    });
+  const abrirEdicion = (cliente) => {
+    setEditando(cliente);
+    setForm({ nombre: cliente.nombre, telefono: cliente.telefono || '', email: cliente.email || '' });
     setModalAbierto(true);
   };
 
@@ -70,56 +66,48 @@ export default function ProductosPage() {
 
   const handleGuardar = async (e) => {
     e.preventDefault();
-    if (!form.nombre.trim() || !form.codigo.trim()) return;
+    if (!form.nombre.trim()) return;
     setGuardando(true);
     try {
-      const payload = {
-        ...form,
-        precio: parseFloat(form.precio) || 0,
-      };
       if (editando) {
-        const { codigo, ...datosActualizar } = payload;
-        await actualizarProducto(editando.codigo, datosActualizar);
-        mostrarExito('Producto actualizado correctamente.');
+        await actualizarCliente(editando.id, form);
+        mostrarExito('Cliente actualizado correctamente.');
       } else {
-        await crearProducto(payload);
-        mostrarExito('Producto creado correctamente.');
+        await crearCliente(form);
+        mostrarExito('Cliente creado correctamente.');
       }
       cerrarModal();
       cargar();
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al guardar el producto.');
+      setError(err.response?.data?.error || 'Error al guardar el cliente.');
     } finally {
       setGuardando(false);
     }
   };
 
-  const handleEliminar = async (producto) => {
-    if (!window.confirm(`¿Eliminár "${producto.nombre}"? Esta acción no se puede deshacer.`)) return;
+  const handleEliminar = async (cliente) => {
+    if (!window.confirm(`¿Eliminár a "${cliente.nombre}"? Esta acción no se puede deshacer.`)) return;
     try {
-      await eliminarProducto(producto.codigo);
-      mostrarExito('Producto eliminado.');
+      await eliminarCliente(cliente.id);
+      mostrarExito('Cliente eliminado.');
       cargar();
     } catch {
-      setError('No se pudo eliminar el producto.');
+      setError('No se pudo eliminar el cliente.');
     }
   };
-
-  const formatearPrecio = (p) =>
-    new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(p);
 
   return (
     <div>
       <div className="page-header d-flex align-items-center justify-content-between">
         <div>
-          <h2><i className="bi bi-box me-2 text-primary"></i>Productos</h2>
+          <h2><i className="bi bi-people me-2 text-primary"></i>Clientes</h2>
           <p className="text-secondary mb-0" style={{ fontSize: '0.875rem' }}>
-            {productos.length} producto{productos.length !== 1 ? 's' : ''} en catálogo
+            {clientes.length} cliente{clientes.length !== 1 ? 's' : ''} registrado{clientes.length !== 1 ? 's' : ''}
           </p>
         </div>
         <button className="btn btn-primary d-flex align-items-center gap-2" onClick={abrirAlta}>
           <i className="bi bi-plus-lg"></i>
-          Nuevo producto
+          Nuevo cliente
         </button>
       </div>
 
@@ -145,13 +133,13 @@ export default function ProductosPage() {
           <input
             type="text"
             className="form-control border-start-0"
-            placeholder="Buscar por nombre o código..."
+            placeholder="Buscar por nombre, email..."
             value={buscar}
             onChange={(e) => setBuscar(e.target.value)}
             style={{ borderRadius: '0 8px 8px 0' }}
           />
           {buscar && (
-            <button className="btn btn-outline-secondary" onClick={() => setBuscar('')}>
+            <button className="btn btn-outline-secondary border-start-0" onClick={() => setBuscar('')}>
               <i className="bi bi-x"></i>
             </button>
           )}
@@ -165,47 +153,39 @@ export default function ProductosPage() {
               <span className="visually-hidden">Cargando...</span>
             </div>
           </div>
-        ) : productos.length === 0 ? (
+        ) : clientes.length === 0 ? (
           <div className="text-center py-5 text-secondary">
-            <i className="bi bi-box fs-1 d-block mb-2 opacity-25"></i>
-            {buscar ? 'No se encontraron productos con ese criterio.' : 'Aún no hay productos registrados.'}
+            <i className="bi bi-people fs-1 d-block mb-2 opacity-25"></i>
+            {buscar ? 'No se encontraron clientes con ese criterio.' : 'Aún no hay clientes registrados.'}
           </div>
         ) : (
           <div className="table-responsive">
             <table className="table table-hover align-middle mb-0">
               <thead>
                 <tr>
-                  <th>Código</th>
                   <th>Nombre</th>
-                  <th>Descripción</th>
-                  <th className="text-end">Precio</th>
+                  <th>Teléfono</th>
+                  <th>Email</th>
                   <th className="text-end">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {productos.map((p) => (
-                  <tr key={p.codigo}>
-                    <td>
-                      <span className="badge bg-light text-dark border" style={{ fontFamily: 'monospace' }}>
-                        {p.codigo}
-                      </span>
-                    </td>
-                    <td className="fw-500">{p.nombre}</td>
-                    <td className="text-secondary" style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {p.descripcion || <span className="text-muted">—</span>}
-                    </td>
-                    <td className="text-end fw-500">{formatearPrecio(p.precio)}</td>
+                {clientes.map((c) => (
+                  <tr key={c.id}>
+                    <td className="fw-500">{c.nombre}</td>
+                    <td className="text-secondary">{c.telefono || <span className="text-muted">—</span>}</td>
+                    <td className="text-secondary">{c.email || <span className="text-muted">—</span>}</td>
                     <td className="text-end">
                       <button
                         className="btn btn-sm btn-outline-secondary me-1"
-                        onClick={() => abrirEdicion(p)}
+                        onClick={() => abrirEdicion(c)}
                         title="Editar"
                       >
                         <i className="bi bi-pencil"></i>
                       </button>
                       <button
                         className="btn btn-sm btn-outline-danger"
-                        onClick={() => handleEliminar(p)}
+                        onClick={() => handleEliminar(c)}
                         title="Eliminar"
                       >
                         <i className="bi bi-trash"></i>
@@ -227,65 +207,42 @@ export default function ProductosPage() {
               <form onSubmit={handleGuardar}>
                 <div className="modal-header">
                   <h5 className="modal-title">
-                    {editando ? 'Editar producto' : 'Nuevo producto'}
+                    {editando ? 'Editar cliente' : 'Nuevo cliente'}
                   </h5>
                   <button type="button" className="btn-close" onClick={cerrarModal}></button>
                 </div>
                 <div className="modal-body">
                   <div className="mb-3">
-                    <label className="form-label">Código *</label>
-                    <input
-                      name="codigo"
-                      className="form-control"
-                      placeholder="Ej: ARM-001"
-                      value={form.codigo}
-                      onChange={handleChange}
-                      required
-                      disabled={!!editando}
-                      style={{ fontFamily: 'monospace' }}
-                    />
-                    {editando && (
-                      <div className="form-text">El código no se puede modificar.</div>
-                    )}
-                  </div>
-                  <div className="mb-3">
                     <label className="form-label">Nombre *</label>
                     <input
                       name="nombre"
                       className="form-control"
-                      placeholder="Nombre del producto"
+                      placeholder="Nombre completo"
                       value={form.nombre}
                       onChange={handleChange}
                       required
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Descripción</label>
-                    <textarea
-                      name="descripcion"
+                    <label className="form-label">Teléfono</label>
+                    <input
+                      name="telefono"
                       className="form-control"
-                      placeholder="Descripción opcional"
-                      rows={2}
-                      value={form.descripcion}
+                      placeholder="Ej: 11-1234-5678"
+                      value={form.telefono}
                       onChange={handleChange}
-                    ></textarea>
+                    />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Precio *</label>
-                    <div className="input-group">
-                      <span className="input-group-text">$</span>
-                      <input
-                        name="precio"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        className="form-control"
-                        placeholder="0.00"
-                        value={form.precio}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
+                    <label className="form-label">Email</label>
+                    <input
+                      name="email"
+                      type="email"
+                      className="form-control"
+                      placeholder="correo@ejemplo.com"
+                      value={form.email}
+                      onChange={handleChange}
+                    />
                   </div>
                 </div>
                 <div className="modal-footer">
@@ -296,7 +253,7 @@ export default function ProductosPage() {
                     {guardando ? (
                       <span className="spinner-border spinner-border-sm me-1" role="status"></span>
                     ) : null}
-                    {editando ? 'Guardar cambios' : 'Crear producto'}
+                    {editando ? 'Guardar cambios' : 'Crear cliente'}
                   </button>
                 </div>
               </form>

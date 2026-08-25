@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bs-body-bg: #FFFFFF;
+  --bs-secondary-bg: #FAFAFA;
+  --bs-border-color: #E4E4E7;
+  --bs-body-color: #18181B;
+  --bs-secondary-color: #71717A;
+  --bs-primary: #4F46E5;
+  --bs-primary-rgb: 79, 70, 229;
+  --bs-border-radius: 10px;
+  --bs-border-radius-lg: 14px;
+  --bs-font-sans-serif: 'Inter', system-ui, sans-serif;
+  --bs-body-font-family: var(--bs-font-sans-serif);
+  --bs-link-color: #4F46E5;
+  --bs-link-hover-color: #3730a3;
+}
+
+body {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  font-family: var(--bs-font-sans-serif);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Navbar */
+.navbar {
+  border-bottom: 1px solid var(--bs-border-color);
+  background-color: #ffffff !important;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  color: var(--bs-body-color) !important;
+  letter-spacing: -0.3px;
+}
+
+.nav-link {
+  color: var(--bs-secondary-color) !important;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.75rem !important;
+  border-radius: 8px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.nav-link:hover {
+  color: var(--bs-body-color) !important;
+  background-color: var(--bs-secondary-bg);
+}
+
+.nav-link.active {
+  color: #4F46E5 !important;
+  background-color: rgba(79, 70, 229, 0.08);
+}
+
+/* Cards */
+.card {
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+}
+
+.card-header {
+  background-color: var(--bs-secondary-bg);
+  border-bottom: 1px solid var(--bs-border-color);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Metric cards del dashboard */
+.metric-card {
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  padding: 1.5rem;
+  background: #fff;
+  transition: box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+.metric-card .metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--bs-body-color);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.metric-card .metric-label {
+  font-size: 0.82rem;
+  color: var(--bs-secondary-color);
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+.metric-card .metric-icon {
+  font-size: 1.5rem;
+  color: #4F46E5;
+  opacity: 0.85;
+}
+
+/* Botón primario */
+.btn-primary {
+  background-color: #4F46E5;
+  border-color: #4F46E5;
+  font-weight: 500;
+}
+
+.btn-primary:hover {
+  background-color: #3730a3;
+  border-color: #3730a3;
+}
+
+.btn-outline-primary {
+  color: #4F46E5;
+  border-color: #4F46E5;
+  font-weight: 500;
+}
+
+.btn-outline-primary:hover {
+  background-color: #4F46E5;
+  border-color: #4F46E5;
+}
+
+/* Tabla */
+.table {
+  border-color: var(--bs-border-color);
+  font-size: 0.9rem;
+}
+
+.table thead th {
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--bs-border-color);
+  background-color: var(--bs-secondary-bg);
+}
+
+/* Formularios */
+.form-control, .form-select {
+  border-color: var(--bs-border-color);
+  font-size: 0.9rem;
+  border-radius: 8px;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #4F46E5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.form-label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--bs-body-color);
+}
+
+/* Page header */
+.page-header {
+  border-bottom: 1px solid var(--bs-border-color);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.page-header h2 {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  font-size: 1.5rem;
+}
+
+/* Alertas y feedback */
+.alert {
+  border-radius: var(--bs-border-radius);
+  font-size: 0.875rem;
+}
+
+/* Carrito de nueva venta */
+.carrito-item {
+  background: var(--bs-secondary-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+}
+
+/* Badge */
+.badge {
+  font-weight: 500;
+}
+
+/* Spinner */
+.spinner-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* Detalle de venta expandible */
+.detalle-venta {
+  background-color: var(--bs-secondary-bg);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
