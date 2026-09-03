@@ -10,7 +10,7 @@ import graduacionRoutes from './routes/graduacion.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import authMiddleware from './middlewares/auth.middleware.js';
 import auditMiddleware from './middlewares/audit.middleware.js';
-import errorHandler from './moddlewares/errorHandler.js';
+import errorHandler from './middlewares/errorHandler.js';
 
 const app = express();
 
