@@ -1,12 +1,25 @@
 import { dbQuery, dbRun } from '../config/db.js';
 
 const VentaRepository = {
-    async obtenerTodas() {
-        const sql = `
-        select v.*, c.nombre as cliente_nombre
-        from ventas v join clientes c on v.cliente_id = c.id
-        order by v.fecha desc`;
-        return await dbQuery(sql);
+    async obtenerTodas(dni = '', cliente_id = null) {
+        let sql = `
+            select v.*, c.nombre as cliente_nombre, c.apellido as cliente_apellido, c.dni as cliente_dni
+            from ventas v join clientes c on v.cliente_id = c.id
+            where 1=1
+        `;
+        const params = [];
+
+        if (dni) {
+            sql += ` AND c.dni LIKE ?`;
+            params.push(`%${dni}%`);
+        }
+        if (cliente_id) {
+            sql += ` AND v.cliente_id = ?`;
+            params.push(cliente_id);
+        }
+
+        sql += ` order by v.fecha desc`;
+        return await dbQuery(sql, params);
     },
 
     async obtenerPorId(ventaId) {
@@ -20,25 +33,30 @@ const VentaRepository = {
 
     async obtenerDetallePorVentaId(ventaId) {
         const sql = `
-        select dv.precio_unitario, dv.cantidad, p.nombre as producto_nombre
-        from detalle_ventas dv join productos p on dv.producto_id = p.id
+        select dv.precio_unitario, dv.cantidad, 
+               p.nombre as producto_nombre,
+               c.descripcion as cristal_descripcion,
+               c.material as cristal_material
+        from detalle_ventas dv 
+        left join productos p on dv.producto_id = p.id
+        left join cristales c on dv.cristal_id = c.id
         where dv.venta_id = ?`;
         return await dbQuery(sql, [ventaId]);
     },
 
-    async crearVenta({ cliente_id, total }) {
+    async crearVenta({ cliente_id, total, descripcion }) {
         const sql = `
-        insert into ventas (cliente_id, total)
-        values (?, ?)`;
-        const resultado = await dbRun(sql, [cliente_id, total]);
+        insert into ventas (cliente_id, total, descripcion)
+        values (?, ?, ?)`;
+        const resultado = await dbRun(sql, [cliente_id, total, descripcion || '']);
         return resultado.id;
     },
 
-    async crearDetalleVenta({ venta_id, producto_id, cantidad, precio_unitario }) {
+    async crearDetalleVenta({ venta_id, producto_id, cristal_id, cantidad, precio_unitario }) {
         const sql = `
-        insert into detalle_ventas (venta_id, producto_id, cantidad, precio_unitario)
-        values (?, ?, ?, ?)`;
-        const resultado = await dbRun(sql, [venta_id, producto_id, cantidad, precio_unitario]);
+        insert into detalle_ventas (venta_id, producto_id, cristal_id, cantidad, precio_unitario)
+        values (?, ?, ?, ?, ?)`;
+        const resultado = await dbRun(sql, [venta_id, producto_id || null, cristal_id || null, cantidad, precio_unitario]);
         return resultado.id;
     }
 };

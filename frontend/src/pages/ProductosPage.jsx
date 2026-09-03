@@ -5,12 +5,15 @@ import {
   actualizarProducto,
   eliminarProducto,
 } from '../api/productos.api';
+import useAuth from '../context/useAuth';
 
-const FORM_VACIO = { codigo: '', nombre: '', descripcion: '', precio: '' };
+const FORM_VACIO = { codigo: '', nombre: '', descripcion: '', precio: '', categoria: 'Armazón de Vista' };
 
 export default function ProductosPage() {
+  const { isAdmin } = useAuth();
   const [productos, setProductos] = useState([]);
   const [buscar, setBuscar] = useState('');
+  const [categoriaFilter, setCategoriaFilter] = useState('');
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [exito, setExito] = useState(null);
@@ -23,7 +26,7 @@ export default function ProductosPage() {
   const cargar = useCallback(async () => {
     try {
       setCargando(true);
-      const data = await obtenerProductos(buscar);
+      const data = await obtenerProductos(buscar, categoriaFilter);
       setProductos(data);
       setError(null);
     } catch {
@@ -31,7 +34,7 @@ export default function ProductosPage() {
     } finally {
       setCargando(false);
     }
-  }, [buscar]);
+  }, [buscar, categoriaFilter]);
 
   useEffect(() => {
     const timer = setTimeout(() => cargar(), 300);
@@ -56,6 +59,7 @@ export default function ProductosPage() {
       nombre: producto.nombre,
       descripcion: producto.descripcion || '',
       precio: producto.precio,
+      categoria: producto.categoria || 'Armazón de Vista',
     });
     setModalAbierto(true);
   };
@@ -78,8 +82,8 @@ export default function ProductosPage() {
         precio: parseFloat(form.precio) || 0,
       };
       if (editando) {
-        const { codigo, ...datosActualizar } = payload;
-        await actualizarProducto(editando.codigo, datosActualizar);
+        const datosActualizar = payload;
+        await actualizarProducto(editando.id, datosActualizar);
         mostrarExito('Producto actualizado correctamente.');
       } else {
         await crearProducto(payload);
@@ -97,7 +101,7 @@ export default function ProductosPage() {
   const handleEliminar = async (producto) => {
     if (!window.confirm(`¿Eliminár "${producto.nombre}"? Esta acción no se puede deshacer.`)) return;
     try {
-      await eliminarProducto(producto.codigo);
+      await eliminarProducto(producto.id);
       mostrarExito('Producto eliminado.');
       cargar();
     } catch {
@@ -117,10 +121,12 @@ export default function ProductosPage() {
             {productos.length} producto{productos.length !== 1 ? 's' : ''} en catálogo
           </p>
         </div>
-        <button className="btn btn-primary d-flex align-items-center gap-2" onClick={abrirAlta}>
-          <i className="bi bi-plus-lg"></i>
-          Nuevo producto
-        </button>
+        {isAdmin && (
+          <button className="btn btn-primary d-flex align-items-center gap-2" onClick={abrirAlta}>
+            <i className="bi bi-plus-lg"></i>
+            Nuevo producto
+          </button>
+        )}
       </div>
 
       {exito && (
@@ -137,8 +143,8 @@ export default function ProductosPage() {
         </div>
       )}
 
-      <div className="mb-3">
-        <div className="input-group">
+      <div className="mb-3 d-flex gap-2">
+        <div className="input-group" style={{ flex: 1 }}>
           <span className="input-group-text bg-white border-end-0">
             <i className="bi bi-search text-secondary"></i>
           </span>
@@ -148,7 +154,6 @@ export default function ProductosPage() {
             placeholder="Buscar por nombre o código..."
             value={buscar}
             onChange={(e) => setBuscar(e.target.value)}
-            style={{ borderRadius: '0 8px 8px 0' }}
           />
           {buscar && (
             <button className="btn btn-outline-secondary" onClick={() => setBuscar('')}>
@@ -156,6 +161,17 @@ export default function ProductosPage() {
             </button>
           )}
         </div>
+        <select 
+          className="form-select" 
+          style={{ width: '200px' }}
+          value={categoriaFilter}
+          onChange={(e) => setCategoriaFilter(e.target.value)}
+        >
+          <option value="">Todas las categorías</option>
+          <option value="Armazón de Vista">Armazón de Vista</option>
+          <option value="Armazón de Sol">Armazón de Sol</option>
+          <option value="Accesorio">Accesorio</option>
+        </select>
       </div>
 
       <div className="card">
@@ -177,40 +193,48 @@ export default function ProductosPage() {
                 <tr>
                   <th>Código</th>
                   <th>Nombre</th>
+                  <th>Categoría</th>
                   <th>Descripción</th>
                   <th className="text-end">Precio</th>
-                  <th className="text-end">Acciones</th>
+                  {isAdmin && <th className="text-end">Acciones</th>}
                 </tr>
               </thead>
               <tbody>
                 {productos.map((p) => (
-                  <tr key={p.codigo}>
+                  <tr key={p.id}>
                     <td>
                       <span className="badge bg-light text-dark border" style={{ fontFamily: 'monospace' }}>
                         {p.codigo}
                       </span>
                     </td>
                     <td className="fw-500">{p.nombre}</td>
+                    <td>
+                      <span className={`badge ${p.categoria === 'Accesorio' ? 'bg-secondary' : 'bg-info'}`}>
+                        {p.categoria || 'Armazón de Vista'}
+                      </span>
+                    </td>
                     <td className="text-secondary" style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {p.descripcion || <span className="text-muted">—</span>}
                     </td>
                     <td className="text-end fw-500">{formatearPrecio(p.precio)}</td>
-                    <td className="text-end">
-                      <button
-                        className="btn btn-sm btn-outline-secondary me-1"
-                        onClick={() => abrirEdicion(p)}
-                        title="Editar"
-                      >
-                        <i className="bi bi-pencil"></i>
-                      </button>
-                      <button
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={() => handleEliminar(p)}
-                        title="Eliminar"
-                      >
-                        <i className="bi bi-trash"></i>
-                      </button>
-                    </td>
+                    {isAdmin && (
+                      <td className="text-end">
+                        <button
+                          className="btn btn-sm btn-outline-secondary me-1"
+                          onClick={() => abrirEdicion(p)}
+                          title="Editar"
+                        >
+                          <i className="bi bi-pencil"></i>
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => handleEliminar(p)}
+                          title="Eliminar"
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -241,12 +265,8 @@ export default function ProductosPage() {
                       value={form.codigo}
                       onChange={handleChange}
                       required
-                      disabled={!!editando}
                       style={{ fontFamily: 'monospace' }}
                     />
-                    {editando && (
-                      <div className="form-text">El código no se puede modificar.</div>
-                    )}
                   </div>
                   <div className="mb-3">
                     <label className="form-label">Nombre *</label>
@@ -258,6 +278,20 @@ export default function ProductosPage() {
                       onChange={handleChange}
                       required
                     />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Categoría *</label>
+                    <select
+                      name="categoria"
+                      className="form-select"
+                      value={form.categoria}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="Armazón de Vista">Armazón de Vista</option>
+                      <option value="Armazón de Sol">Armazón de Sol</option>
+                      <option value="Accesorio">Accesorio</option>
+                    </select>
                   </div>
                   <div className="mb-3">
                     <label className="form-label">Descripción</label>

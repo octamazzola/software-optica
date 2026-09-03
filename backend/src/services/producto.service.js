@@ -1,21 +1,24 @@
 import ProductoRepository from '../repositories/producto.repository.js';
 
 const ProductoService = {
-    async obtenerProducto(buscar = '') {
-        return await ProductoRepository.obtenerTodos(buscar);
+    async obtenerProducto(buscar = '', categoria = '') {
+        return await ProductoRepository.obtenerTodos(buscar, categoria);
     },
 
-    async obtenerPorCodigo(codigo) {
-        const producto = await ProductoRepository.obtenerPorCodigo(codigo);
+    async obtenerMasVendidos() {
+        return await ProductoRepository.obtenerMasVendidos();
+    },
+
+    async obtenerPorId(id) {
+        const producto = await ProductoRepository.obtenerPorId(id);
 
         if (!producto) {
-            throw Error(`El producto con el codigo ${codigo} no existe.`)
+            throw Error(`El producto con el id ${id} no existe.`);
         }
         return producto;
-
     },
 
-    async crearProducto({ codigo, nombre, precio, descripcion }) {
+    async crearProducto({ codigo, nombre, precio, descripcion, categoria }) {
         if (!codigo || codigo.trim() === '') {
             throw Error('El codigo es obligatorio para crear un producto.');
         }
@@ -26,22 +29,20 @@ const ProductoService = {
             throw Error('El precio debe ser un número mayor o igual a 0.');
         }
 
-        // Regla de negocio: No permitir códigos duplicados
-        const existe = await ProductoRepository.obtenerPorCodigo(codigo);
-        if (existe) {
-            throw Error(`El producto con el codigo ${codigo} ya está registrado.`);
+        return await ProductoRepository.crear({ codigo, nombre, precio, descripcion, categoria });
+    },
+
+    async eliminarProducto(id) {
+        await this.obtenerPorId(id);
+        return await ProductoRepository.eliminar(id);
+    },
+
+    async actualizarProducto(id, { codigo, nombre, precio, descripcion, categoria }) {
+        await this.obtenerPorId(id);
+        
+        if (!codigo || codigo.trim() === '') {
+            throw Error('El codigo es obligatorio para crear un producto.');
         }
-
-        return await ProductoRepository.crear({ codigo, nombre, precio, descripcion });
-    },
-
-    async eliminarProducto(codigo) {
-        await this.obtenerPorCodigo(codigo);
-        return await ProductoRepository.eliminar(codigo);
-    },
-
-    async actualizarProducto(codigo, { nombre, precio, descripcion }) {
-        await this.obtenerPorCodigo(codigo);
         
         if (!nombre || nombre.trim() === '') {
             throw Error('El nombre del producto es obligatorio para actualizarlo.');
@@ -50,7 +51,7 @@ const ProductoService = {
             throw Error('El precio debe ser un número mayor o igual a 0.');
         }
 
-        return await ProductoRepository.actualizar(codigo, { nombre, precio, descripcion });
+        return await ProductoRepository.actualizar(id, { codigo, nombre, precio, descripcion, categoria });
     }
 
 };

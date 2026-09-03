@@ -17,21 +17,33 @@ const ClienteService = {
     return cliente;
   },
 
-  async crearCliente({ nombre, telefono, email }) {
+  async crearCliente({ nombre, apellido, dni, telefono, email }) {
     if (!nombre || nombre.trim() === '') {
       throw new Error('El nombre del cliente es obligatorio.');
     }
-    return await ClienteRepository.crear({ nombre, telefono, email });
+    if (!apellido || apellido.trim() === '') {
+      throw new Error('El apellido del cliente es obligatorio.');
+    }
+    if (!dni || dni.trim() === '') {
+      throw new Error('El DNI del cliente es obligatorio.');
+    }
+    return await ClienteRepository.crear({ nombre, apellido, dni, telefono, email });
   },
 
-  async actualizarCliente(id, { nombre, telefono, email }) {
+  async actualizarCliente(id, { nombre, apellido, dni, telefono, email }) {
 
     await this.obtenerClientePorId(id);
 
     if (!nombre || nombre.trim() === '') {
       throw new Error('El nombre del cliente es obligatorio para actualizarlo.');
     }
-    return await ClienteRepository.actualizar(id, { nombre, telefono, email });
+    if (!apellido || apellido.trim() === '') {
+      throw new Error('El apellido del cliente es obligatorio para actualizarlo.');
+    }
+    if (!dni || dni.trim() === '') {
+      throw new Error('El DNI del cliente es obligatorio para actualizarlo.');
+    }
+    return await ClienteRepository.actualizar(id, { nombre, apellido, dni, telefono, email });
   },
 
   async eliminarCliente(id) {

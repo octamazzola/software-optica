@@ -3,8 +3,13 @@ import ProductoService from "../services/producto.service.js"
 const ProductoController = {
 
     async obtenerProductos(req, res) {
-        const { buscar } = req.query;
-        const productos = await ProductoService.obtenerProducto(buscar);
+        const { buscar, categoria } = req.query;
+        const productos = await ProductoService.obtenerProducto(buscar, categoria);
+        res.json(productos);
+    },
+
+    async obtenerMasVendidos(req, res) {
+        const productos = await ProductoService.obtenerMasVendidos();
         res.json(productos);
     },
 
@@ -15,21 +20,21 @@ const ProductoController = {
     },
 
     async crearProducto(req, res) {
-        const { codigo, nombre, precio, descripcion } = req.body;
-        const nuevoId = await ProductoService.crearProducto({ codigo, nombre, precio, descripcion });
+        const { codigo, nombre, precio, descripcion, categoria } = req.body;
+        const nuevoId = await ProductoService.crearProducto({ codigo, nombre, precio, descripcion, categoria });
         res.status(201).json({ message: "Producto agregado correctamente.", id: nuevoId });
     },
 
     async actualizarProducto(req, res) {
-        const { codigo } = req.params;
-        const { nombre, precio, descripcion } = req.body;
-        await ProductoService.actualizarProducto(codigo, { nombre, precio, descripcion });
+        const { id } = req.params;
+        const { codigo, nombre, precio, descripcion, categoria } = req.body;
+        await ProductoService.actualizarProducto(id, { codigo, nombre, precio, descripcion, categoria });
         res.status(200).json({ message: "Producto actualizado correctamente." });
     },
 
     async eliminarProducto(req, res) {
-        const { codigo } = req.params;
-        await ProductoService.eliminarProducto(codigo);
+        const { id } = req.params;
+        await ProductoService.eliminarProducto(id);
         res.status(200).json({ message: "Producto eliminado correctamente." });
     }
 

@@ -9,15 +9,15 @@ const ClienteRepository = {
       // Usamos el operador LIKE de SQL para buscar coincidencias parciales (ej: 'juan' encontrará 'Juan Pérez')
       const sql = `
         SELECT * FROM clientes 
-        WHERE nombre LIKE ? OR email LIKE ?
-        ORDER BY nombre ASC
+        WHERE nombre LIKE ? OR apellido LIKE ? OR email LIKE ? OR dni LIKE ?
+        ORDER BY nombre ASC, apellido ASC
       `;
       const termino = `%${buscar}%`;
-      return await dbQuery(sql, [termino, termino]);
+      return await dbQuery(sql, [termino, termino, termino, termino]);
     }
 
     // Si no hay búsqueda, traemos todos ordenados por nombre
-    return await dbQuery('SELECT * FROM clientes ORDER BY nombre ASC');
+    return await dbQuery('SELECT * FROM clientes ORDER BY nombre ASC, apellido ASC');
   },
 
   // Busca un cliente por su ID único
@@ -27,23 +27,23 @@ const ClienteRepository = {
   },
 
   // Inserta un nuevo cliente y devuelve su ID asignado
-  async crear({ nombre, telefono, email }) {
+  async crear({ nombre, apellido, dni, telefono, email }) {
     const sql = `
-      INSERT INTO clientes (nombre, telefono, email) 
-      VALUES (?, ?, ?)
+      INSERT INTO clientes (nombre, apellido, dni, telefono, email) 
+      VALUES (?, ?, ?, ?, ?)
     `;
-    const resultado = await dbRun(sql, [nombre, telefono, email]);
+    const resultado = await dbRun(sql, [nombre, apellido, dni, telefono, email]);
     return resultado.id; // Retorna el ID asignado por el AUTOINCREMENT de SQLite
   },
 
   // Actualiza los datos de un cliente existente
-  async actualizar(id, { nombre, telefono, email }) {
+  async actualizar(id, { nombre, apellido, dni, telefono, email }) {
     const sql = `
       UPDATE clientes 
-      SET nombre = ?, telefono = ?, email = ?
+      SET nombre = ?, apellido = ?, dni = ?, telefono = ?, email = ?
       WHERE id = ?
     `;
-    const resultado = await dbRun(sql, [nombre, telefono, email, id]);
+    const resultado = await dbRun(sql, [nombre, apellido, dni, telefono, email, id]);
     return resultado.changes > 0; // Retorna true si se modificó algún registro
   },
   // Elimina un cliente por su ID

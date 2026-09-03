@@ -2,7 +2,8 @@ import VentaService from "../services/venta.service.js";
 
 const VentaController = {
     async obtenerVentas(req, res) {
-        const ventas = await VentaService.obtenerVentas();
+        const { dni, cliente_id } = req.query;
+        const ventas = await VentaService.obtenerVentas(dni, cliente_id);
         res.json(ventas);
     },
 
@@ -13,8 +14,8 @@ const VentaController = {
     },
 
     async crearVenta(req, res) {
-        const { cliente_id, items } = req.body;
-        const venta = await VentaService.crearVenta({ cliente_id, items });
+        const { cliente_id, items, descripcion, graduacion } = req.body;
+        const venta = await VentaService.crearVenta({ cliente_id, items, descripcion, graduacion });
         res.json(venta);
     }
 };

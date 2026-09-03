@@ -5,10 +5,14 @@ import {
   actualizarCliente,
   eliminarCliente,
 } from '../api/clientes.api';
+import { obtenerVentas } from '../api/ventas.api';
+import useAuth from '../context/useAuth';
+import TablaGraduacionDetalle from '../components/TablaGraduacionDetalle';
 
-const FORM_VACIO = { nombre: '', telefono: '', email: '' };
+const FORM_VACIO = { nombre: '', apellido: '', dni: '', telefono: '', email: '' };
 
 export default function ClientesPage() {
+  const { isAdmin } = useAuth();
   const [clientes, setClientes] = useState([]);
   const [buscar, setBuscar] = useState('');
   const [cargando, setCargando] = useState(true);
@@ -20,6 +24,11 @@ export default function ClientesPage() {
   const [editando, setEditando] = useState(null); // null = alta, object = edición
   const [form, setForm] = useState(FORM_VACIO);
   const [guardando, setGuardando] = useState(false);
+
+  // Expansión de historial de ventas
+  const [clienteExpandido, setClienteExpandido] = useState(null);
+  const [ventasData, setVentasData] = useState(null);
+  const [cargandoVentas, setCargandoVentas] = useState(false);
 
   const cargar = useCallback(async () => {
     try {
@@ -52,7 +61,13 @@ export default function ClientesPage() {
 
   const abrirEdicion = (cliente) => {
     setEditando(cliente);
-    setForm({ nombre: cliente.nombre, telefono: cliente.telefono || '', email: cliente.email || '' });
+    setForm({ 
+      nombre: cliente.nombre, 
+      apellido: cliente.apellido || '', 
+      dni: cliente.dni || '', 
+      telefono: cliente.telefono || '', 
+      email: cliente.email || '' 
+    });
     setModalAbierto(true);
   };
 
@@ -66,7 +81,7 @@ export default function ClientesPage() {
 
   const handleGuardar = async (e) => {
     e.preventDefault();
-    if (!form.nombre.trim()) return;
+    if (!form.nombre.trim() || !form.apellido.trim() || !form.dni.trim()) return;
     setGuardando(true);
     try {
       if (editando) {
@@ -93,6 +108,36 @@ export default function ClientesPage() {
       cargar();
     } catch {
       setError('No se pudo eliminar el cliente.');
+    }
+  };
+
+  const formatearPrecio = (p) =>
+    new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(p);
+
+  const formatearFecha = (f) => {
+    if (!f) return '—';
+    return new Date(f).toLocaleDateString('es-AR', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
+  };
+
+  const toggleHistorial = async (cliente) => {
+    if (clienteExpandido === cliente.id) {
+      setClienteExpandido(null);
+      setVentasData(null);
+      return;
+    }
+    setClienteExpandido(cliente.id);
+    setVentasData(null);
+    setCargandoVentas(true);
+    try {
+      const data = await obtenerVentas({ cliente_id: cliente.id });
+      setVentasData(data);
+    } catch {
+      setVentasData({ error: 'No se pudo cargar el historial.' });
+    } finally {
+      setCargandoVentas(false);
     }
   };
 
@@ -133,7 +178,7 @@ export default function ClientesPage() {
           <input
             type="text"
             className="form-control border-start-0"
-            placeholder="Buscar por nombre, email..."
+            placeholder="Buscar por DNI, apellido, nombre o email..."
             value={buscar}
             onChange={(e) => setBuscar(e.target.value)}
             style={{ borderRadius: '0 8px 8px 0' }}
@@ -163,18 +208,33 @@ export default function ClientesPage() {
             <table className="table table-hover align-middle mb-0">
               <thead>
                 <tr>
+                  <th>DNI</th>
+                  <th>Apellido</th>
                   <th>Nombre</th>
                   <th>Teléfono</th>
                   <th>Email</th>
+                  <th className="text-end">Ventas</th>
                   <th className="text-end">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {clientes.map((c) => (
-                  <tr key={c.id}>
-                    <td className="fw-500">{c.nombre}</td>
+                  <React.Fragment key={c.id}>
+                    <tr>
+                      <td className="fw-500" style={{ fontFamily: 'monospace' }}>{c.dni}</td>
+                    <td className="fw-500">{c.apellido}</td>
+                    <td>{c.nombre}</td>
                     <td className="text-secondary">{c.telefono || <span className="text-muted">—</span>}</td>
                     <td className="text-secondary">{c.email || <span className="text-muted">—</span>}</td>
+                    <td className="text-end">
+                      <button
+                        className={`btn btn-sm ${clienteExpandido === c.id ? 'btn-primary' : 'btn-outline-secondary'}`}
+                        onClick={() => toggleHistorial(c)}
+                        title="Ver historial de compras"
+                      >
+                        <i className={`bi bi-chevron-${clienteExpandido === c.id ? 'up' : 'down'}`}></i>
+                      </button>
+                    </td>
                     <td className="text-end">
                       <button
                         className="btn btn-sm btn-outline-secondary me-1"
@@ -183,15 +243,73 @@ export default function ClientesPage() {
                       >
                         <i className="bi bi-pencil"></i>
                       </button>
-                      <button
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={() => handleEliminar(c)}
-                        title="Eliminar"
-                      >
-                        <i className="bi bi-trash"></i>
-                      </button>
+                      {isAdmin && (
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => handleEliminar(c)}
+                          title="Eliminar"
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      )}
                     </td>
                   </tr>
+                  {clienteExpandido === c.id && (
+                    <tr>
+                      <td colSpan={7} className="p-0 border-0">
+                        <div className="detalle-venta mx-3 mb-3">
+                          {cargandoVentas ? (
+                            <div className="text-center py-3">
+                              <div className="spinner-border spinner-border-sm text-primary" role="status">
+                                <span className="visually-hidden">Cargando...</span>
+                              </div>
+                            </div>
+                          ) : ventasData?.error ? (
+                            <div className="text-danger">{ventasData.error}</div>
+                          ) : ventasData?.length === 0 ? (
+                            <div className="text-secondary text-center py-2">Sin compras registradas</div>
+                          ) : (
+                            <>
+                              <div className="fw-500 mb-2" style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#71717A' }}>
+                                Historial de Compras
+                              </div>
+                              <table className="table table-sm mb-0" style={{ fontSize: '0.875rem' }}>
+                                <thead>
+                                  <tr>
+                                    <th className="fw-500 border-0 ps-0">Fecha</th>
+                                    <th className="fw-500 border-0 text-end pe-0">Total</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {ventasData?.map((venta, i) => (
+                                    <React.Fragment key={i}>
+                                      <tr>
+                                        <td className="border-0 ps-0 text-secondary">
+                                          {formatearFecha(venta.fecha)}
+                                          {venta.descripcion && <span className="ms-2 text-muted">({venta.descripcion})</span>}
+                                        </td>
+                                        <td className="border-0 text-end pe-0 fw-500">
+                                          {formatearPrecio(venta.total)}
+                                        </td>
+                                      </tr>
+                                      {venta.graduacion && (
+                                        <tr>
+                                          <td colSpan={2} className="border-0 p-0 pb-3">
+                                            <TablaGraduacionDetalle graduacion={venta.graduacion} />
+                                          </td>
+                                        </tr>
+                                      )}
+                                    </React.Fragment>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
                 ))}
               </tbody>
             </table>
@@ -212,13 +330,37 @@ export default function ClientesPage() {
                   <button type="button" className="btn-close" onClick={cerrarModal}></button>
                 </div>
                 <div className="modal-body">
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Nombre *</label>
+                      <input
+                        name="nombre"
+                        className="form-control"
+                        placeholder="Ej: Juan"
+                        value={form.nombre}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Apellido *</label>
+                      <input
+                        name="apellido"
+                        className="form-control"
+                        placeholder="Ej: Pérez"
+                        value={form.apellido}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
                   <div className="mb-3">
-                    <label className="form-label">Nombre *</label>
+                    <label className="form-label">DNI *</label>
                     <input
-                      name="nombre"
+                      name="dni"
                       className="form-control"
-                      placeholder="Nombre completo"
-                      value={form.nombre}
+                      placeholder="Sin puntos ni espacios"
+                      value={form.dni}
                       onChange={handleChange}
                       required
                     />

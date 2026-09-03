@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { obtenerVentas, obtenerVentaPorId } from '../api/ventas.api';
 import { Link } from 'react-router-dom';
+import TablaGraduacionDetalle from '../components/TablaGraduacionDetalle';
 
 export default function VentasHistorialPage() {
   const [ventas, setVentas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
+  const [dniBuscar, setDniBuscar] = useState('');
   const [ventaExpandida, setVentaExpandida] = useState(null);
   const [detalleData, setDetalleData] = useState(null);
   const [cargandoDetalle, setCargandoDetalle] = useState(false);
@@ -13,7 +15,7 @@ export default function VentasHistorialPage() {
   useEffect(() => {
     const cargar = async () => {
       try {
-        const data = await obtenerVentas();
+        const data = await obtenerVentas(dniBuscar);
         setVentas(data);
       } catch {
         setError('No se pudo cargar el historial de ventas.');
@@ -21,8 +23,10 @@ export default function VentasHistorialPage() {
         setCargando(false);
       }
     };
-    cargar();
-  }, []);
+    
+    const timer = setTimeout(() => cargar(), 300);
+    return () => clearTimeout(timer);
+  }, [dniBuscar]);
 
   const toggleDetalle = async (venta) => {
     if (ventaExpandida === venta.id) {
@@ -86,6 +90,27 @@ export default function VentasHistorialPage() {
         </div>
       )}
 
+      <div className="mb-3">
+        <div className="input-group">
+          <span className="input-group-text bg-white border-end-0">
+            <i className="bi bi-search text-secondary"></i>
+          </span>
+          <input
+            type="text"
+            className="form-control border-start-0"
+            placeholder="Buscar ventas por DNI del cliente..."
+            value={dniBuscar}
+            onChange={(e) => setDniBuscar(e.target.value)}
+            style={{ borderRadius: '0 8px 8px 0' }}
+          />
+          {dniBuscar && (
+            <button className="btn btn-outline-secondary border-start-0" onClick={() => setDniBuscar('')}>
+              <i className="bi bi-x"></i>
+            </button>
+          )}
+        </div>
+      </div>
+
       {ventas.length === 0 && !error ? (
         <div className="card">
           <div className="text-center py-5 text-secondary">
@@ -115,7 +140,10 @@ export default function VentasHistorialPage() {
                     <tr>
                       <td className="text-secondary" style={{ fontFamily: 'monospace' }}>#{v.id}</td>
                       <td className="text-secondary">{formatearFecha(v.fecha)}</td>
-                      <td className="fw-500">{v.cliente_nombre || '—'}</td>
+                      <td className="fw-500">
+                        {v.cliente_nombre ? `${v.cliente_nombre} ${v.cliente_apellido || ''}` : '—'}
+                        {v.cliente_dni && <div className="text-secondary small fw-normal">DNI: {v.cliente_dni}</div>}
+                      </td>
                       <td className="text-end fw-500">{formatearPrecio(v.total)}</td>
                       <td className="text-end">
                         <button
@@ -158,7 +186,11 @@ export default function VentasHistorialPage() {
                                   <tbody>
                                     {detalleData?.productos?.map((item, i) => (
                                       <tr key={i}>
-                                        <td className="border-0 ps-0">{item.producto_nombre || item.nombre || '—'}</td>
+                                        <td className="border-0 ps-0">
+                                            {item.producto_nombre && <><i className="bi bi-box text-secondary me-1"></i> {item.producto_nombre}</>}
+                                            {!item.producto_nombre && item.cristal_material && <><i className="bi bi-eye text-secondary me-1"></i> {item.cristal_material} {item.cristal_descripcion}</>}
+                                            {!item.producto_nombre && !item.cristal_material && (item.nombre || '—')}
+                                        </td>
                                         <td className="border-0 text-center">{item.cantidad}</td>
                                         <td className="border-0 text-end text-secondary">{formatearPrecio(item.precio_unitario)}</td>
                                         <td className="border-0 text-end pe-0 fw-500">
@@ -168,6 +200,14 @@ export default function VentasHistorialPage() {
                                     ))}
                                   </tbody>
                                 </table>
+                                {detalleData.descripcion && (
+                                    <div className="mt-3 p-2 bg-light border rounded text-secondary" style={{ fontSize: '0.875rem' }}>
+                                        <strong>Nota:</strong> {detalleData.descripcion}
+                                    </div>
+                                )}
+                                {detalleData.graduacion && (
+                                    <TablaGraduacionDetalle graduacion={detalleData.graduacion} />
+                                )}
                               </>
                             )}
                           </div>

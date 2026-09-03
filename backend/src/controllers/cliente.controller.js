@@ -14,15 +14,15 @@ const ClienteController = {
     },
 
     async crearCliente(req, res) {
-        const { nombre, telefono, email } = req.body;
-        const nuevoId = await ClienteService.crearCliente({ nombre, telefono, email });
+        const { nombre, apellido, dni, telefono, email } = req.body;
+        const nuevoId = await ClienteService.crearCliente({ nombre, apellido, dni, telefono, email });
         res.status(201).json({ id: nuevoId, message: 'Cliente registrado con éxito.' });
     },
 
     async actualizarCliente(req, res) {
         const { id } = req.params;
-        const { nombre, telefono, email } = req.body;
-        await ClienteService.actualizarCliente(id, { nombre, telefono, email });
+        const { nombre, apellido, dni, telefono, email } = req.body;
+        await ClienteService.actualizarCliente(id, { nombre, apellido, dni, telefono, email });
         res.json({ message: 'Cliente actualizado correctamente.' });
     },
 

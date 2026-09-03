@@ -1,0 +1,67 @@
+Seguí en la rama `ia_desarrollo`. Armá un plan corto y mostrámelo antes 
+de arrancar.
+
+1) PERMITIR CÓDIGOS DE PRODUCTO DUPLICADOS
+- DB: en backend/src/config/db.js, la tabla productos tiene 
+  `codigo TEXT UNIQUE NOT NULL` — sacá el UNIQUE (dejalo NOT NULL nomás). 
+  SQLite no permite quitar una constraint con ALTER directo, así que vas 
+  a necesitar recrear la tabla (crear una nueva sin UNIQUE, copiar los 
+  datos, borrar la vieja, renombrar) — hacelo sin perder los productos 
+  ya cargados.
+- Backend: en producto.service.js, sacá la validación de "no permitir 
+  códigos duplicados" en crearProducto.
+- IMPORTANTE — cambiar el identificador de código a id en todo lo que 
+  edita/borra un producto puntual, porque codigo ya no es único:
+  - producto.routes.js: cambiá las rutas GET/:codigo, PUT/:codigo y 
+    DELETE/:codigo a GET/:id, PUT/:id y DELETE/:id
+  - producto.controller.js: leé `id` de req.params en esos 3 métodos
+  - producto.repository.js: ya existe obtenerPorId — agregá actualizar 
+    y eliminar por id (WHERE id = ?) en vez de por codigo
+  - producto.service.js: actualizarProducto y eliminarProducto ahora 
+    reciben id
+  - frontend/src/api/productos.api.js: las llamadas de actualizar y 
+    eliminar tienen que mandar el id, no el codigo
+  - ProductosPage.jsx: usá producto.id (no producto.codigo) para editar 
+    y eliminar, y cambiá key={p.codigo} por key={p.id} en la tabla
+- codigo sigue siendo obligatorio para crear un producto, solo que ya 
+  no tiene que ser único
+
+2) RENOMBRAR LA APP Y CAMBIAR EL LOGO
+- Cambiá el nombre de "Óptica Visual" a "Óptica Visión Urbana" en 
+  Navbar.jsx y en el <title> de frontend/index.html
+- Te paso dos archivos de imagen ya preparados (recortados del logo real 
+  del negocio, con fondo transparente):
+  - logo-vision-urbana.png → colocalo en frontend/src/assets/ y usalo en 
+    el Navbar en vez del ícono de anteojos actual
+  - favicon-vision-urbana.png → colocalo en frontend/public/ y 
+    referencialo en el <link rel="icon"> de index.html
+  (Yo te dejo los archivos ya listos, vos simplemente copialos a esas 
+  carpetas del proyecto antes de que Antigravity los use.)
+
+CÓMO TRABAJAR
+- Plan primero, después ejecutá de corrido
+- Sacá una captura mostrando el navbar con el nombre y logo nuevos, y 
+  otra probando que podés crear dos productos con el mismo código y 
+  editarlos/borrarlos por separado sin que se afecten entre sí
+- Al final, resumime qué quedó hecho
+
+ADEMÁS de lo anterior — historial de compras dentro de Clientes
+
+- Backend: extendé GET /api/ventas para que además de ?dni= acepte 
+  ?cliente_id= como filtro alternativo (cualquiera de los dos, 
+  independiente uno del otro, ambos opcionales)
+- Frontend: en ClientesPage.jsx, agregá un botón para expandir cada fila 
+  de cliente (mismo patrón visual que ya existe en VentasHistorialPage 
+  para expandir el detalle de una venta). Al expandir, traé y mostrá 
+  todas las ventas de ese cliente (fecha y total de cada una) llamando 
+  a obtenerVentas con su cliente_id
+- Si el cliente no tiene compras, mostrá un mensaje simple tipo "Sin 
+  compras registradas" en vez de una tabla vacía
+
+Verificación: buscá un cliente que ya tenga una venta cargada (Octavio 
+Mazzola, por ejemplo), expandí su fila, y confirmá que aparece la venta 
+que le registraste antes.
+
+LA RUTA DE ACCESO DE LAS IMAGENES ESTA EN 
+"C:\Users\Administrator\Desktop\files\favicon-vision-urbana.png"
+"C:\Users\Administrator\Desktop\files\logo-vision-urbana.png"
