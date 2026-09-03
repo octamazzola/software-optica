@@ -1467,7 +1467,7 @@ No agregar complejidad solamente para cumplir una checklist genérica.
 El agente NO puede declarar RELEASE READY si existe cualquier requisito obligatorio con estado NOT VERIFIED, BLOCKED, FAILED o UNKNOWN. Un requisito sin verificar no se considera aprobado implícitamente. "El sistema parece estable" no equivale a "VERIFIED". Los tests, backups y restauraciones deben ejecutarse de verdad, no revisarse solo visualmente.
 
 # 49. GIT BRANCH PROTECTION
-La rama de trabajo es ia_desarrollo. No hacer merge, rebase ni push a main ni a ninguna otra rama salvo instrucción explícita. Terminar un cambio no autoriza automáticamente subirlo a main.
+La rama de trabajo principal de ahora en más es main. Todos los cambios deben hacerse y pushearse a main salvo instrucción explícita de usar otra rama.
 
 # 50. EVIDENCIA DE VERIFICACIÓN ALTERNATIVA
 Si un método de verificación planeado falla (ej: un script de test no corre), documentar por qué falló y qué se usó en su lugar como evidencia equivalente. Nunca reemplazar una verificación fallida por una afirmación cualitativa sin evidencia concreta.

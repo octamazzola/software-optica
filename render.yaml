@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: optica-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false # Render te pedirá este valor en el dashboard
+      - key: FRONTEND_URL
+        sync: false # Render te pedirá este valor (la URL de Netlify)
+      - key: JWT_SECRET
+        generateValue: true # Render genera una clave segura automáticamente
+      - key: PORT
+        value: 10000
