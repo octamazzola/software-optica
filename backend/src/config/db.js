@@ -1,4 +1,4 @@
-import sqlite3 from "sqlite3"
+
 import path from "path"
 import { fileURLToPath } from "url"
 import bcrypt from "bcryptjs"
@@ -23,6 +23,8 @@ if (usePostgres) {
     });
     console.log('🌐 Conectado con éxito a la base de datos PostgreSQL (Supabase).');
 } else {
+    const sqlite3Module = await import("sqlite3");
+    const sqlite3 = sqlite3Module.default || sqlite3Module;
     db = new sqlite3.Database(dbPath, (err) => {
         if (err) {
             console.error('Error al conectar la base de datos', err.message);
