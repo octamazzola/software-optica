@@ -12,13 +12,14 @@ const isTestEnv = process.env.NODE_ENV === 'test'
 const dbPath = path.resolve(_dirname, isTestEnv ? '../../database.test.sqlite' : '../../database.sqlite')
 
 // Detección de PostgreSQL (Supabase)
-const usePostgres = !!process.env.DATABASE_URL;
+const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.SUPABASE_DATABASE_URL;
+const usePostgres = !!databaseUrl;
 let db;
 let pgPool;
 
 if (usePostgres) {
     pgPool = new Pool({
-        connectionString: process.env.DATABASE_URL,
+        connectionString: databaseUrl,
         ssl: { rejectUnauthorized: false } // Requerido por la mayoría de cloud hosts
     });
     console.log('🌐 Conectado con éxito a la base de datos PostgreSQL (Supabase).');
