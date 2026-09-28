@@ -14,6 +14,16 @@ echo ""
 # Detener instancias previas si las hubiera
 pkill -f "node.*(backend|frontend)" 2>/dev/null || true
 
+# Verificar version de Node.js
+NODE_MAJOR=$(node -v 2>/dev/null | cut -d'.' -f1 | sed 's/v//')
+if [ -n "$NODE_MAJOR" ] && [ "$NODE_MAJOR" -lt 20 ]; then
+    echo "  [ATENCION] Tenes instalado Node.js v$NODE_MAJOR."
+    echo "  Vite y el sistema requieren Node.js 20 o superior."
+    echo "  Para actualizarlo, ejecuta en la terminal:"
+    echo "  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt install -y nodejs"
+    echo ""
+fi
+
 # Verificar dependencias
 if [ ! -d "backend/node_modules" ]; then
     echo "  [INFO] Instalando dependencias del backend..."
@@ -26,11 +36,11 @@ if [ ! -d "frontend/node_modules" ]; then
 fi
 
 echo "  [1/3] Iniciando backend y base de datos..."
-(cd "$DIR/backend" && npm run dev) > /dev/null 2>&1 &
+(cd "$DIR/backend" && npm run dev) > "$DIR/backend.log" 2>&1 &
 BACKEND_PID=$!
 
 echo "  [2/3] Iniciando interfaz web..."
-(cd "$DIR/frontend" && npm run dev) > /dev/null 2>&1 &
+(cd "$DIR/frontend" && npm run dev) > "$DIR/frontend.log" 2>&1 &
 FRONTEND_PID=$!
 
 echo "  [3/3] Esperando que inicien los servicios..."
