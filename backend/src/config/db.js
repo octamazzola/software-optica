@@ -91,6 +91,8 @@ export const inicializarBaseDeDatos = async () => {
       CREATE TABLE IF NOT EXISTS clientes (
         ${idCol},
         nombre TEXT NOT NULL,
+        apellido TEXT NOT NULL DEFAULT '',
+        dni TEXT UNIQUE,
         telefono TEXT,
         email TEXT,
         fecha_registro ${datetime} DEFAULT CURRENT_TIMESTAMP
@@ -222,8 +224,8 @@ async function cargarDatosSemilla() {
 
     if (count === 0) {
         console.log('🌱 Base de datos vacía. Cargando datos de muestra...');
-        await dbRun("INSERT INTO clientes (nombre, telefono, email) VALUES ('Juan Pérez', '555-0199', 'juan.perez@email.com')");
-        await dbRun("INSERT INTO clientes (nombre, telefono, email) VALUES ('María Gómez', '555-0144', 'maria.gomez@email.com')");
+        await dbRun("INSERT INTO clientes (nombre, apellido, dni, telefono, email) VALUES ('Juan', 'Pérez', '10000000', '555-0199', 'juan.perez@email.com')");
+        await dbRun("INSERT INTO clientes (nombre, apellido, dni, telefono, email) VALUES ('María', 'Gómez', '10000001', '555-0144', 'maria.gomez@email.com')");
         await dbRun("INSERT INTO productos (codigo, nombre, descripcion, precio, categoria) VALUES ('ARM-001', 'Armazón Ray-Ban Clubmaster', 'Estilo clásico retro de acetato.', 12500, 'Armazón de Sol')");
         await dbRun("INSERT INTO productos (codigo, nombre, descripcion, precio, categoria) VALUES ('LEN-002', 'Par de Cristales Antireflejo', 'Tratamiento protector de luz artificial.', 8000, 'Accesorio')");
         await dbRun("INSERT INTO productos (codigo, nombre, descripcion, precio, categoria) VALUES ('EST-003', 'Estuche Rígido con Microfibra', 'Protección clásica para anteojos.', 1500, 'Accesorio')");
