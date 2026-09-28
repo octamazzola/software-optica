@@ -122,6 +122,14 @@ const VentaService = {
             await dbRun('ROLLBACK');
             throw new Error(`Error al registrar la venta: ${error.message}`);
         }
+    },
+
+    async eliminarVenta(id) {
+        const venta = await VentaRepository.obtenerPorId(id);
+        if (!venta) {
+            throw new Error(`La venta con ID ${id} no existe.`);
+        }
+        return await VentaRepository.eliminar(id);
     }
 };
 

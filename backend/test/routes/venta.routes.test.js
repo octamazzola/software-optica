@@ -111,4 +111,29 @@ describe('Venta Routes', () => {
       expect(res.body.length).toBeGreaterThan(0);
     });
   });
+
+  describe('DELETE /api/ventas/:id', () => {
+    it('debe eliminar la venta correctamente', async () => {
+      // Registrar una venta para borrar
+      const nuevaVenta = {
+        cliente_id: clienteId,
+        items: [{ producto_id: productoId, cantidad: 1, precio_unitario: 500 }],
+        descripcion: 'Para borrar'
+      };
+
+      const resCrear = await request(app)
+        .post('/api/ventas')
+        .set('Authorization', `Bearer ${token}`)
+        .send(nuevaVenta);
+
+      const idVenta = resCrear.body.id || resCrear.body.ventaId;
+
+      const resDelete = await request(app)
+        .delete(`/api/ventas/${idVenta}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(resDelete.body.message).toContain('correctamente');
+    });
+  });
 });

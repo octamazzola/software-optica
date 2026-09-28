@@ -5,7 +5,7 @@ import {
   actualizarCliente,
   eliminarCliente,
 } from '../api/clientes.api';
-import { obtenerVentas } from '../api/ventas.api';
+import { obtenerVentas, eliminarVenta } from '../api/ventas.api';
 import useAuth from '../context/useAuth';
 import TablaGraduacionDetalle from '../components/TablaGraduacionDetalle';
 
@@ -101,13 +101,29 @@ export default function ClientesPage() {
   };
 
   const handleEliminar = async (cliente) => {
-    if (!window.confirm(`¿Eliminár a "${cliente.nombre}"? Esta acción no se puede deshacer.`)) return;
+    const nombreCompleto = `${cliente.nombre} ${cliente.apellido || ''}`.trim();
+    if (!window.confirm(`¿Eliminar a "${nombreCompleto}"? Esta acción eliminará también todas sus ventas asociadas y no se puede deshacer.`)) return;
     try {
       await eliminarCliente(cliente.id);
-      mostrarExito('Cliente eliminado.');
+      mostrarExito('Cliente eliminado correctamente.');
+      if (clienteExpandido === cliente.id) {
+        setClienteExpandido(null);
+        setVentasData(null);
+      }
       cargar();
-    } catch {
-      setError('No se pudo eliminar el cliente.');
+    } catch (err) {
+      setError(err.response?.data?.error || 'No se pudo eliminar el cliente.');
+    }
+  };
+
+  const handleEliminarVenta = async (ventaId) => {
+    if (!window.confirm(`¿Eliminar la venta #${ventaId}? Esta acción no se puede deshacer.`)) return;
+    try {
+      await eliminarVenta(ventaId);
+      mostrarExito(`Venta #${ventaId} eliminada.`);
+      setVentasData((prev) => (Array.isArray(prev) ? prev.filter((v) => v.id !== ventaId) : prev));
+    } catch (err) {
+      setError(err.response?.data?.error || 'No se pudo eliminar la venta.');
     }
   };
 
@@ -279,7 +295,8 @@ export default function ClientesPage() {
                                 <thead>
                                   <tr>
                                     <th className="fw-500 border-0 ps-0">Fecha</th>
-                                    <th className="fw-500 border-0 text-end pe-0">Total</th>
+                                    <th className="fw-500 border-0 text-end">Total</th>
+                                    <th className="fw-500 border-0 text-end pe-0" style={{ width: 60 }}>Acción</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -287,16 +304,28 @@ export default function ClientesPage() {
                                     <React.Fragment key={i}>
                                       <tr>
                                         <td className="border-0 ps-0 text-secondary">
+                                          <span className="me-2 text-muted fw-bold" style={{ fontFamily: 'monospace' }}>#{venta.id}</span>
                                           {formatearFecha(venta.fecha)}
                                           {venta.descripcion && <span className="ms-2 text-muted">({venta.descripcion})</span>}
                                         </td>
-                                        <td className="border-0 text-end pe-0 fw-500">
+                                        <td className="border-0 text-end fw-500">
                                           {formatearPrecio(venta.total)}
+                                        </td>
+                                        <td className="border-0 text-end pe-0">
+                                          {isAdmin && (
+                                            <button
+                                              className="btn btn-sm btn-outline-danger p-0 px-2"
+                                              onClick={() => handleEliminarVenta(venta.id)}
+                                              title="Eliminar venta"
+                                            >
+                                              <i className="bi bi-trash"></i>
+                                            </button>
+                                          )}
                                         </td>
                                       </tr>
                                       {venta.graduacion && (
                                         <tr>
-                                          <td colSpan={2} className="border-0 p-0 pb-3">
+                                          <td colSpan={3} className="border-0 p-0 pb-3">
                                             <TablaGraduacionDetalle graduacion={venta.graduacion} />
                                           </td>
                                         </tr>

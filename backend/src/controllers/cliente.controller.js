@@ -16,20 +16,20 @@ const ClienteController = {
     async crearCliente(req, res) {
         const { nombre, apellido, dni, telefono, email } = req.body;
         const nuevoId = await ClienteService.crearCliente({ nombre, apellido, dni, telefono, email });
-        res.status(201).json({ id: nuevoId, message: 'Cliente registrado con éxito.' });
+        res.status(201).json({ id: nuevoId, message: 'Cliente registrado con éxito.', mensaje: 'Cliente creado correctamente' });
     },
 
     async actualizarCliente(req, res) {
         const { id } = req.params;
         const { nombre, apellido, dni, telefono, email } = req.body;
         await ClienteService.actualizarCliente(id, { nombre, apellido, dni, telefono, email });
-        res.json({ message: 'Cliente actualizado correctamente.' });
+        res.json({ message: 'Cliente actualizado correctamente.', mensaje: 'Cliente actualizado correctamente' });
     },
 
     async eliminarCliente(req, res) {
         const { id } = req.params;
         await ClienteService.eliminarCliente(id);
-        res.json({ message: 'Cliente eliminado correctamente.' });
+        res.json({ message: 'Cliente eliminado correctamente.', mensaje: 'Cliente eliminado correctamente' });
     }
 };
 

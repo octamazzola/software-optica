@@ -118,7 +118,7 @@ export const inicializarBaseDeDatos = async () => {
         fecha ${datetime} DEFAULT CURRENT_TIMESTAMP,
         total REAL NOT NULL,
         descripcion TEXT,
-        FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+        FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
       )
     `);
 

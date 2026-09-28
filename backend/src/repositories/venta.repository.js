@@ -93,6 +93,13 @@ const VentaRepository = {
         values (?, ?, ?, ?, ?)`;
         const resultado = await dbRun(sql, [venta_id, producto_id || null, cristal_id || null, cantidad, precio_unitario]);
         return resultado.id;
+    },
+
+    async eliminar(id) {
+        await dbRun('DELETE FROM detalle_ventas WHERE venta_id = ?', [id]);
+        await dbRun('DELETE FROM graduaciones WHERE venta_id = ?', [id]);
+        const resultado = await dbRun('DELETE FROM ventas WHERE id = ?', [id]);
+        return resultado.changes > 0;
     }
 };
 export default VentaRepository;

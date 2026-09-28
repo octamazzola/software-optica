@@ -114,4 +114,22 @@ describe('VentaService', () => {
       expect(result.graduacion.material).toBe('Org');
     });
   });
+
+  describe('eliminarVenta', () => {
+    it('debe lanzar error si la venta no existe', async () => {
+      VentaRepository.obtenerPorId.mockResolvedValue(null);
+      await expect(VentaService.eliminarVenta(999)).rejects.toThrow('La venta con ID 999 no existe.');
+    });
+
+    it('debe eliminar la venta si existe', async () => {
+      VentaRepository.obtenerPorId.mockResolvedValue({ id: 99 });
+      VentaRepository.eliminar.mockResolvedValue(true);
+
+      const result = await VentaService.eliminarVenta(99);
+
+      expect(VentaRepository.obtenerPorId).toHaveBeenCalledWith(99);
+      expect(VentaRepository.eliminar).toHaveBeenCalledWith(99);
+      expect(result).toBe(true);
+    });
+  });
 });

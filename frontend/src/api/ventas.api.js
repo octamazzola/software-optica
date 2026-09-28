@@ -29,3 +29,8 @@ export const obtenerVentaPorId = async (id) => {
     const respuesta = await axiosInstancia.get(`/ventas/${id}`);
     return respuesta.data;
 };
+
+export const eliminarVenta = async (id) => {
+    const respuesta = await axiosInstancia.delete(`/ventas/${id}`);
+    return respuesta.data;
+};

@@ -1,18 +1,42 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { obtenerVentas, obtenerVentaPorId } from '../api/ventas.api';
+import { obtenerVentas, obtenerVentaPorId, eliminarVenta } from '../api/ventas.api';
 import { Link } from 'react-router-dom';
 import TablaGraduacionDetalle from '../components/TablaGraduacionDetalle';
+import useAuth from '../context/useAuth';
 
 export default function VentasHistorialPage() {
+  const { isAdmin } = useAuth();
   const [ventas, setVentas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
+  const [exito, setExito] = useState(null);
   const [terminoBuscar, setTerminoBuscar] = useState('');
   const [fechaDesde, setFechaDesde] = useState('');
   const [fechaHasta, setFechaHasta] = useState('');
   const [ventaExpandida, setVentaExpandida] = useState(null);
   const [detalleData, setDetalleData] = useState(null);
   const [cargandoDetalle, setCargandoDetalle] = useState(false);
+
+  const mostrarExito = (msg) => {
+    setExito(msg);
+    setTimeout(() => setExito(null), 3500);
+  };
+
+  const handleEliminarVenta = async (venta) => {
+    const nombreCliente = venta.cliente_nombre ? ` del cliente "${venta.cliente_nombre} ${venta.cliente_apellido || ''}".trim()` : '';
+    if (!window.confirm(`¿Eliminar la venta #${venta.id}${nombreCliente}? Esta acción no se puede deshacer.`)) return;
+    try {
+      await eliminarVenta(venta.id);
+      mostrarExito(`Venta #${venta.id} eliminada correctamente.`);
+      setVentas((prev) => prev.filter((item) => item.id !== venta.id));
+      if (ventaExpandida === venta.id) {
+        setVentaExpandida(null);
+        setDetalleData(null);
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'No se pudo eliminar la venta.');
+    }
+  };
 
   useEffect(() => {
     const cargar = async () => {
@@ -137,10 +161,18 @@ export default function VentasHistorialPage() {
         </div>
       </div>
 
+      {exito && (
+        <div className="alert alert-success d-flex align-items-center gap-2" role="alert">
+          <i className="bi bi-check-circle-fill"></i>
+          {exito}
+        </div>
+      )}
+
       {error && (
         <div className="alert alert-danger d-flex align-items-center gap-2" role="alert">
           <i className="bi bi-exclamation-triangle-fill"></i>
           {error}
+          <button className="btn-close ms-auto" onClick={() => setError(null)}></button>
         </div>
       )}
 
@@ -296,7 +328,7 @@ export default function VentasHistorialPage() {
                   <th>Fecha</th>
                   <th>Cliente</th>
                   <th className="text-end">Total</th>
-                  <th className="text-end">Detalle</th>
+                  <th className="text-end">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -312,12 +344,21 @@ export default function VentasHistorialPage() {
                       <td className="text-end fw-500">{formatearPrecio(v.total)}</td>
                       <td className="text-end">
                         <button
-                          className={`btn btn-sm ${ventaExpandida === v.id ? 'btn-primary' : 'btn-outline-secondary'}`}
+                          className={`btn btn-sm me-1 ${ventaExpandida === v.id ? 'btn-primary' : 'btn-outline-secondary'}`}
                           onClick={() => toggleDetalle(v)}
                           title="Ver detalle"
                         >
                           <i className={`bi bi-chevron-${ventaExpandida === v.id ? 'up' : 'down'}`}></i>
                         </button>
+                        {isAdmin && (
+                          <button
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => handleEliminarVenta(v)}
+                            title="Eliminar venta"
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        )}
                       </td>
                     </tr>
                     {ventaExpandida === v.id && (

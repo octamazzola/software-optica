@@ -46,8 +46,11 @@ const ClienteRepository = {
     const resultado = await dbRun(sql, [nombre, apellido, dni, telefono, email, id]);
     return resultado.changes > 0; // Retorna true si se modificó algún registro
   },
-  // Elimina un cliente por su ID
+  // Elimina un cliente por su ID y limpia sus ventas y graduaciones asociadas
   async eliminar(id) {
+    await dbRun('DELETE FROM detalle_ventas WHERE venta_id IN (SELECT id FROM ventas WHERE cliente_id = ?)', [id]);
+    await dbRun('DELETE FROM graduaciones WHERE venta_id IN (SELECT id FROM ventas WHERE cliente_id = ?)', [id]);
+    await dbRun('DELETE FROM ventas WHERE cliente_id = ?', [id]);
     const resultado = await dbRun('DELETE FROM clientes WHERE id = ?', [id]);
     return resultado.changes > 0; // Retorna true si se eliminó algún registro
   }

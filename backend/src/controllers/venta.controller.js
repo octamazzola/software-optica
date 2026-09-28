@@ -23,8 +23,14 @@ const VentaController = {
 
     async crearVenta(req, res) {
         const { cliente_id, items, descripcion, graduacion } = req.body;
-        const venta = await VentaService.crearVenta({ cliente_id, items, descripcion, graduacion });
-        res.json(venta);
+        const ventaId = await VentaService.crearVenta({ cliente_id, items, descripcion, graduacion });
+        res.status(201).json({ id: ventaId, ventaId, message: 'Venta registrada con éxito.' });
+    },
+
+    async eliminarVenta(req, res) {
+        const { id } = req.params;
+        await VentaService.eliminarVenta(id);
+        res.json({ message: 'Venta eliminada correctamente.' });
     }
 };
 
