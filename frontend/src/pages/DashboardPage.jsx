@@ -121,15 +121,15 @@ export default function DashboardPage() {
       <div className="row g-3">
         <div className="col-md-4">
           <Link to="/clientes" className="text-decoration-none">
-            <div className="card h-100 border" style={{ transition: 'box-shadow 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)'}
-              onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}>
+            <div className="card h-100 border" style={{ transition: 'all 0.2s ease', boxShadow: '0 1px 3px rgba(38, 50, 56, 0.05)' }}
+              onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 12px rgba(38, 50, 56, 0.08)'}
+              onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 3px rgba(38, 50, 56, 0.05)'}>
               <div className="card-body d-flex align-items-center gap-3 py-4">
-                <div className="rounded-3 p-3" style={{ background: 'rgba(79,70,229,0.08)' }}>
-                  <i className="bi bi-people-fill text-primary fs-4"></i>
+                <div className="rounded-3 p-3" style={{ background: 'rgba(84, 122, 158, 0.12)' }}>
+                  <i className="bi bi-people-fill fs-4" style={{ color: 'var(--primary)' }}></i>
                 </div>
                 <div>
-                  <div className="fw-600 text-dark">Gestionar Clientes</div>
+                  <div className="fw-600" style={{ color: 'var(--text-primary)' }}>Gestionar Clientes</div>
                   <div className="text-secondary" style={{ fontSize: '0.8rem' }}>Alta, edición y eliminación</div>
                 </div>
                 <i className="bi bi-chevron-right text-secondary ms-auto"></i>
@@ -140,15 +140,15 @@ export default function DashboardPage() {
 
         <div className="col-md-4">
           <Link to="/productos" className="text-decoration-none">
-            <div className="card h-100 border" style={{ transition: 'box-shadow 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)'}
-              onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}>
+            <div className="card h-100 border" style={{ transition: 'all 0.2s ease', boxShadow: '0 1px 3px rgba(38, 50, 56, 0.05)' }}
+              onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 12px rgba(38, 50, 56, 0.08)'}
+              onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 3px rgba(38, 50, 56, 0.05)'}>
               <div className="card-body d-flex align-items-center gap-3 py-4">
-                <div className="rounded-3 p-3" style={{ background: 'rgba(79,70,229,0.08)' }}>
-                  <i className="bi bi-box-fill text-primary fs-4"></i>
+                <div className="rounded-3 p-3" style={{ background: 'rgba(84, 122, 158, 0.12)' }}>
+                  <i className="bi bi-box-fill fs-4" style={{ color: 'var(--primary)' }}></i>
                 </div>
                 <div>
-                  <div className="fw-600 text-dark">Gestionar Productos</div>
+                  <div className="fw-600" style={{ color: 'var(--text-primary)' }}>Gestionar Productos</div>
                   <div className="text-secondary" style={{ fontSize: '0.8rem' }}>Alta, edición y eliminación</div>
                 </div>
                 <i className="bi bi-chevron-right text-secondary ms-auto"></i>
@@ -159,15 +159,15 @@ export default function DashboardPage() {
 
         <div className="col-md-4">
           <Link to="/nueva-venta" className="text-decoration-none">
-            <div className="card h-100 border" style={{ transition: 'box-shadow 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)'}
-              onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}>
+            <div className="card h-100 border" style={{ transition: 'all 0.2s ease', boxShadow: '0 1px 3px rgba(38, 50, 56, 0.05)' }}
+              onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 12px rgba(38, 50, 56, 0.08)'}
+              onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 3px rgba(38, 50, 56, 0.05)'}>
               <div className="card-body d-flex align-items-center gap-3 py-4">
-                <div className="rounded-3 p-3" style={{ background: 'rgba(79,70,229,0.08)' }}>
-                  <i className="bi bi-cart-plus-fill text-primary fs-4"></i>
+                <div className="rounded-3 p-3" style={{ background: 'rgba(84, 122, 158, 0.12)' }}>
+                  <i className="bi bi-cart-plus-fill fs-4" style={{ color: 'var(--primary)' }}></i>
                 </div>
                 <div>
-                  <div className="fw-600 text-dark">Registrar Venta</div>
+                  <div className="fw-600" style={{ color: 'var(--text-primary)' }}>Registrar Venta</div>
                   <div className="text-secondary" style={{ fontSize: '0.8rem' }}>Seleccionar cliente y productos</div>
                 </div>
                 <i className="bi bi-chevron-right text-secondary ms-auto"></i>

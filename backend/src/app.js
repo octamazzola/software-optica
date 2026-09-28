@@ -14,25 +14,9 @@ import errorHandler from './middlewares/errorHandler.js';
 
 const app = express();
 
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  'http://localhost:5173',
-  'http://127.0.0.1:5173'
-].filter(Boolean).map(url => url.replace(/\/$/, ''));
-
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    const cleanOrigin = origin.replace(/\/$/, '');
-    if (allowedOrigins.includes(cleanOrigin) || /\.netlify\.app$/.test(cleanOrigin)) {
-      callback(null, true);
-    } else {
-      callback(null, false);
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: true,
+  credentials: true
 }));
 
 app.use(helmet({
@@ -40,25 +24,9 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 200,
-  message: { error: 'Demasiadas solicitudes. Intentá de nuevo en 15 minutos.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  message: { error: 'Demasiados intentos de login. Esperá 15 minutos.' },
-});
-
 app.use(express.json());
-app.use('/api', apiLimiter);
 
-// Rutas públicas
-app.use('/api/auth/login', loginLimiter);
+// Rutas de autenticación y gestión de usuarios
 app.use('/api/auth', authRoutes);
 
 app.get('/api/health', (req, res) => {

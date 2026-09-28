@@ -13,7 +13,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg sticky-top shadow-sm bg-white border-bottom">
+    <nav className="navbar navbar-expand-lg sticky-top shadow-sm">
       <div className="container">
         <NavLink className="navbar-brand d-flex align-items-center gap-2 fw-semibold" to="/">
           <img src={logo} alt="Óptica Visión Urbana" height="30" />
@@ -91,40 +91,39 @@ export default function Navbar() {
                     Ventas
                   </NavLink>
                 </li>
+                {user?.rol === 'admin' && (
+                  <li className="nav-item">
+                    <NavLink
+                      className={({ isActive }) => `nav-link ${isActive ? 'active fw-medium' : ''}`}
+                      to="/usuarios"
+                    >
+                      <i className="bi bi-shield-lock me-1"></i>
+                      Usuarios
+                    </NavLink>
+                  </li>
+                )}
               </ul>
 
               <div className="d-flex align-items-center gap-3 pt-2 pt-lg-0 border-top border-lg-0">
                 <div className="d-flex align-items-center gap-2">
                   <div
-                    className="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary fw-bold"
+                    className="rounded-circle user-avatar d-flex align-items-center justify-content-center fw-bold"
                     style={{ width: '34px', height: '34px', fontSize: '0.85rem' }}
                   >
-                    {user?.nombre?.charAt(0)?.toUpperCase() || 'U'}
+                    {user?.nombre?.charAt(0)?.toUpperCase() || 'A'}
                   </div>
                   <div className="d-flex flex-column text-start">
-                    <span className="small fw-semibold text-truncate" style={{ maxWidth: '130px' }}>
-                      {user?.nombre || user?.username}
+                    <span className="small fw-semibold text-truncate user-name" style={{ maxWidth: '140px' }}>
+                      {user?.nombre || 'Administrador'}
                     </span>
                     <span
-                      className={`badge ${
-                        user?.rol === 'admin' ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary'
-                      }`}
+                      className="badge user-badge"
                       style={{ fontSize: '0.65rem', alignSelf: 'flex-start' }}
                     >
-                      {user?.rol === 'admin' ? 'Administrador' : 'Vendedor'}
+                      Modo Local (Admin)
                     </span>
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1"
-                  title="Cerrar sesión"
-                >
-                  <i className="bi bi-box-arrow-right"></i>
-                  <span className="d-none d-xl-inline">Salir</span>
-                </button>
               </div>
             </div>
           </>

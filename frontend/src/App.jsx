@@ -10,6 +10,7 @@ import ProductosPage from './pages/ProductosPage';
 import CristalesPage from './pages/CristalesPage';
 import NuevaVentaPage from './pages/NuevaVentaPage';
 import VentasHistorialPage from './pages/VentasHistorialPage';
+import UsuariosPage from './pages/UsuariosPage';
 
 function App() {
   return (
@@ -18,20 +19,14 @@ function App() {
         <Navbar />
         <main className="container py-4">
           <Routes>
-            {/* Ruta pública */}
-            <Route path="/login" element={<LoginPage />} />
-
-            {/* Rutas protegidas */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/clientes" element={<ClientesPage />} />
-              <Route path="/productos" element={<ProductosPage />} />
-              <Route path="/cristales" element={<CristalesPage />} />
-              <Route path="/nueva-venta" element={<NuevaVentaPage />} />
-              <Route path="/ventas" element={<VentasHistorialPage />} />
-            </Route>
-
-            {/* Redirección por defecto */}
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/clientes" element={<ClientesPage />} />
+            <Route path="/productos" element={<ProductosPage />} />
+            <Route path="/cristales" element={<CristalesPage />} />
+            <Route path="/nueva-venta" element={<NuevaVentaPage />} />
+            <Route path="/ventas" element={<VentasHistorialPage />} />
+            <Route path="/usuarios" element={<UsuariosPage />} />
+            <Route path="/login" element={<Navigate to="/" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

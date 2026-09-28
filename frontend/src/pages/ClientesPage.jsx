@@ -170,28 +170,30 @@ export default function ClientesPage() {
         </div>
       )}
 
-      <div className="mb-3">
-        <div className="input-group">
-          <span className="input-group-text bg-white border-end-0">
-            <i className="bi bi-search text-secondary"></i>
-          </span>
+      <div className="mb-3" style={{ maxWidth: '520px' }}>
+        <div className="search-box">
+          <i className="bi bi-search search-icon"></i>
           <input
             type="text"
-            className="form-control border-start-0"
+            className="search-input"
             placeholder="Buscar por DNI, apellido, nombre o email..."
             value={buscar}
             onChange={(e) => setBuscar(e.target.value)}
-            style={{ borderRadius: '0 8px 8px 0' }}
           />
           {buscar && (
-            <button className="btn btn-outline-secondary border-start-0" onClick={() => setBuscar('')}>
-              <i className="bi bi-x"></i>
+            <button
+              type="button"
+              className="search-clear-btn"
+              onClick={() => setBuscar('')}
+              title="Borrar búsqueda"
+            >
+              <i className="bi bi-x-lg"></i>
             </button>
           )}
         </div>
       </div>
 
-      <div className="card">
+      <div className="card overflow-hidden">
         {cargando ? (
           <div className="spinner-overlay">
             <div className="spinner-border text-primary" role="status">

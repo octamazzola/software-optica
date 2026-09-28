@@ -1,208 +1,588 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* ==========================================================================
+   PALETA PRINCIPAL Y VARIABLES CENTRALIZADAS (COLORES.md)
+   ========================================================================== */
 :root {
-  --bs-body-bg: #FFFFFF;
-  --bs-secondary-bg: #FAFAFA;
-  --bs-border-color: #C7CBD1;
-  --bs-body-color: #18181B;
-  --bs-secondary-color: #71717A;
-  --bs-primary: #4F46E5;
-  --bs-primary-rgb: 79, 70, 229;
-  --bs-border-radius: 10px;
-  --bs-border-radius-lg: 14px;
-  --bs-font-sans-serif: 'Inter', system-ui, sans-serif;
+  /* ==========================================================================
+     PALETA PRINCIPAL Y JERARQUÍA VISUAL (COLORES.md + ARREGLOS)
+     Fondo general: #CBD6DE (Tono pizarra suave que elimina la sensación de pantalla blanca)
+     Superficies:   #F4F7F9 (Subpaneles, cabeceras y detalles)
+     Tarjetas:      #FFFFFF (Tarjetas bien definidas que destacan naturalmente)
+     Texto:         #263238 (Legible, sin llegar a negro puro)
+     Texto sec.:    #60727F (Gris pizarra balanceado)
+     Bordes:        #BCC9D2 (Líneas divisorias nítidas y elegantes)
+     Primario:      #547A9E / Hover #456985
+     ========================================================================== */
+  --background: #C4D3DE;
+  --surface: #EDF3F7;
+  --card: #FFFFFF;
+  --sidebar: #263238;
+
+  --text-primary: #263238;
+  --text-secondary: #576875;
+
+  --border: #B5C5D1;
+
+  --primary: #547A9E;
+  --primary-hover: #456985;
+  --primary-subtle: rgba(84, 122, 158, 0.14);
+
+  /* Variables del Sistema / Aliases para compatibilidad */
+  --bg-general: var(--background);
+  --bg-surface: var(--card);
+  --bg-subsurface: var(--surface);
+  --bg-sidebar: var(--sidebar);
+  --text-main: var(--text-primary);
+  --border-color: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-subtle: var(--primary-subtle);
+
+  /* Estados Suaves (Conservados tal como solicitó el usuario) */
+  --color-success: #6F9B7A;
+  --color-success-hover: #5E8768;
+  --color-warning: #B89B5E;
+  --color-danger: #B86F6F;
+  --color-danger-hover: #A55E5E;
+  --color-info: #6F91AE;
+
+  /* Bootstrap Variable Overrides */
+  --bs-body-bg: var(--background);
+  --bs-body-color: var(--text-primary);
+  --bs-secondary-color: var(--text-secondary);
+  --bs-secondary-bg: var(--surface);
+  --bs-tertiary-bg: #DCE5EB;
+  --bs-border-color: var(--border);
+  
+  --bs-primary: var(--primary);
+  --bs-primary-rgb: 84, 122, 158;
+
+  --bs-success: var(--color-success);
+  --bs-success-rgb: 111, 155, 122;
+
+  --bs-warning: var(--color-warning);
+  --bs-warning-rgb: 184, 155, 94;
+
+  --bs-danger: var(--color-danger);
+  --bs-danger-rgb: 184, 111, 111;
+
+  --bs-info: var(--color-info);
+  --bs-info-rgb: 111, 145, 174;
+
+  --bs-link-color: var(--primary);
+  --bs-link-hover-color: var(--primary-hover);
+
+  --bs-border-radius: 8px;
+  --bs-border-radius-lg: 12px;
+  --bs-font-sans-serif: 'Inter', system-ui, -apple-system, sans-serif;
   --bs-body-font-family: var(--bs-font-sans-serif);
-  --bs-link-color: #4F46E5;
-  --bs-link-hover-color: #3730a3;
 }
 
-body {
-  background-color: var(--bs-body-bg);
+/* ==========================================================================
+   ESTILOS GENERALES
+   ========================================================================== */
+html, body, #root {
+  background-color: var(--background) !important;
   color: var(--bs-body-color);
   font-family: var(--bs-font-sans-serif);
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
-/* Navbar */
+/* ==========================================================================
+   NAVBAR / MENÚ SUPERIOR (Sidebar style: #263238)
+   ========================================================================== */
 .navbar {
-  border-bottom: 2px solid var(--bs-border-color);
-  background-color: #ffffff !important;
+  background-color: var(--bg-sidebar) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 0.65rem 0;
+  box-shadow: 0 2px 8px rgba(38, 50, 56, 0.12);
 }
 
 .navbar-brand {
-  font-weight: 700;
-  color: var(--bs-body-color) !important;
-  letter-spacing: -0.3px;
+  color: #ECEFF1 !important;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.nav-link {
-  color: var(--bs-secondary-color) !important;
+.navbar-brand:hover {
+  color: #FFFFFF !important;
+}
+
+.navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ECEFF1 !important;
+}
+
+.navbar-toggler-icon {
+  filter: invert(1);
+}
+
+/* Enlaces del NAVBAR (aislados para no pisar pestañas internas de tarjetas) */
+.navbar .nav-link {
+  color: #CFD8DC !important;
   font-weight: 500;
-  font-size: 0.9rem;
-  padding: 0.4rem 0.75rem !important;
-  border-radius: 8px;
-  transition: color 0.15s ease, background-color 0.15s ease;
+  font-size: 0.88rem;
+  padding: 0.45rem 0.85rem !important;
+  border-radius: 6px;
+  transition: all 0.15s ease-in-out;
 }
 
-.nav-link:hover {
-  color: var(--bs-body-color) !important;
-  background-color: var(--bs-secondary-bg);
+.navbar .nav-link:hover {
+  color: #FFFFFF !important;
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
-.nav-link.active {
-  color: #4F46E5 !important;
-  background-color: rgba(79, 70, 229, 0.08);
+.navbar .nav-link.active {
+  color: #FFFFFF !important;
+  background-color: var(--primary) !important;
+  font-weight: 600;
 }
 
-/* Cards */
+/* Navbar usuario */
+.navbar .user-avatar {
+  background-color: #37474F !important;
+  color: #ECEFF1 !important;
+}
+
+.navbar .user-name {
+  color: #ECEFF1 !important;
+}
+
+.navbar .user-badge {
+  background-color: rgba(84, 122, 158, 0.35) !important;
+  color: #ECEFF1 !important;
+  border: 1px solid rgba(84, 122, 158, 0.5);
+}
+
+/* ==========================================================================
+   PESTAÑAS DE TARJETA (.card-header-tabs) - SOLUCIÓN PROBLEMA 2
+   ========================================================================== */
+.card-header-tabs {
+  margin: 0 !important;
+  border-bottom: none !important;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.card-header-tabs .nav-item {
+  margin-bottom: 0 !important;
+}
+
+.card-header-tabs .nav-link {
+  color: var(--text-secondary) !important;
+  background-color: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 6px !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.15s ease-in-out;
+}
+
+.card-header-tabs .nav-link:hover {
+  color: var(--text-primary) !important;
+  background-color: rgba(84, 122, 158, 0.12) !important;
+}
+
+.card-header-tabs .nav-link.active {
+  color: #FFFFFF !important;
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 3px rgba(38, 50, 56, 0.18);
+}
+
+.card-header-tabs .nav-link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+/* ==========================================================================
+   COMPONENTE REUTILIZABLE: BUSCADOR UNIFICADO (.search-box) - SOLUCIÓN PROBLEMA 1
+   ========================================================================== */
+.search-box {
+  display: flex;
+  align-items: center;
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--bs-border-radius);
+  padding: 0 0.85rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+  position: relative;
+}
+
+.search-box:focus-within {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(84, 122, 158, 0.20) !important;
+}
+
+.search-box .search-icon {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-right: 0.65rem;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.search-box input.search-input {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0.55rem 0;
+  color: var(--text-primary);
+  width: 100%;
+  font-size: 0.88rem;
+  font-family: inherit;
+}
+
+.search-box input.search-input::placeholder {
+  color: #78909C;
+  opacity: 1;
+}
+
+.search-box .search-clear-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.search-box .search-clear-btn:hover {
+  color: var(--text-primary);
+  background-color: rgba(38, 50, 56, 0.08);
+}
+
+/* ==========================================================================
+   TARJETAS Y SUPERFICIES (Blancas con contraste natural contra fondo slate)
+   ========================================================================== */
 .card {
-  border: 2px solid var(--bs-border-color);
+  background-color: var(--card);
+  border: 1px solid var(--border);
   border-radius: var(--bs-border-radius-lg);
+  box-shadow: 0 1px 4px rgba(38, 50, 56, 0.07), 0 1px 2px rgba(38, 50, 56, 0.04);
 }
 
 .card-header {
-  background-color: var(--bs-secondary-bg);
-  border-bottom: 2px solid var(--bs-border-color);
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
   font-weight: 600;
   font-size: 0.9rem;
+  padding: 0.85rem 1.25rem;
 }
 
 /* Metric cards del dashboard */
 .metric-card {
-  border: 2px solid var(--bs-border-color);
+  border: 1px solid var(--border);
   border-radius: var(--bs-border-radius-lg);
-  padding: 1.5rem;
-  background: #fff;
-  transition: box-shadow 0.2s ease;
+  padding: 1.35rem 1.5rem;
+  background: var(--card);
+  box-shadow: 0 1px 3px rgba(38, 50, 56, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .metric-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(38, 50, 56, 0.08);
 }
 
 .metric-card .metric-value {
-  font-size: 2rem;
+  font-size: 1.85rem;
   font-weight: 700;
-  color: var(--bs-body-color);
-  letter-spacing: -1px;
-  line-height: 1;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
 }
 
 .metric-card .metric-label {
   font-size: 0.82rem;
-  color: var(--bs-secondary-color);
+  color: var(--text-secondary);
   font-weight: 500;
-  margin-top: 0.25rem;
+  margin-top: 0.35rem;
 }
 
 .metric-card .metric-icon {
   font-size: 1.5rem;
-  color: #4F46E5;
-  opacity: 0.85;
+  color: var(--primary);
+  opacity: 0.9;
 }
 
-/* Botón primario */
+/* ==========================================================================
+   BOTONES
+   ========================================================================== */
 .btn-primary {
-  background-color: #4F46E5;
-  border-color: #4F46E5;
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #FFFFFF !important;
   font-weight: 500;
+  font-size: 0.875rem;
+  border-radius: var(--bs-border-radius);
+  transition: all 0.15s ease-in-out;
 }
 
-.btn-primary:hover {
-  background-color: #3730a3;
-  border-color: #3730a3;
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+  background-color: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
+  color: #FFFFFF !important;
 }
 
 .btn-outline-primary {
-  color: #4F46E5;
-  border-color: #4F46E5;
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
   font-weight: 500;
 }
 
-.btn-outline-primary:hover {
-  background-color: #4F46E5;
-  border-color: #4F46E5;
+.btn-outline-primary:hover, .btn-outline-primary:focus {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #FFFFFF !important;
 }
 
-/* Tabla */
+/* Botón secundario discreto */
+.btn-secondary {
+  background-color: #D3DDE3 !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+  font-weight: 500;
+}
+
+.btn-secondary:hover, .btn-secondary:focus {
+  background-color: #C5D1D8 !important;
+  border-color: #B4C2C9 !important;
+  color: var(--text-primary) !important;
+}
+
+.btn-outline-secondary {
+  border-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+  background-color: var(--card);
+}
+
+.btn-outline-secondary:hover, .btn-outline-secondary:focus {
+  background-color: #D3DDE3 !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Botón de peligro / eliminar / cancelar */
+.btn-danger {
+  background-color: var(--color-danger) !important;
+  border-color: var(--color-danger) !important;
+  color: #FFFFFF !important;
+}
+
+.btn-danger:hover, .btn-danger:focus {
+  background-color: var(--color-danger-hover) !important;
+  border-color: var(--color-danger-hover) !important;
+  color: #FFFFFF !important;
+}
+
+.btn-outline-danger {
+  color: var(--color-danger) !important;
+  border-color: var(--color-danger) !important;
+}
+
+.btn-outline-danger:hover, .btn-outline-danger:focus {
+  background-color: var(--color-danger) !important;
+  border-color: var(--color-danger) !important;
+  color: #FFFFFF !important;
+}
+
+/* Botón de éxito */
+.btn-success {
+  background-color: var(--color-success) !important;
+  border-color: var(--color-success) !important;
+  color: #FFFFFF !important;
+}
+
+.btn-success:hover, .btn-success:focus {
+  background-color: var(--color-success-hover) !important;
+  border-color: var(--color-success-hover) !important;
+  color: #FFFFFF !important;
+}
+
+/* ==========================================================================
+   TABLAS
+   ========================================================================== */
 .table {
-  border-color: var(--bs-border-color);
-  font-size: 0.9rem;
+  color: var(--text-primary);
+  border-color: var(--border);
+  font-size: 0.88rem;
+  vertical-align: middle;
+  background-color: var(--card);
 }
 
 .table thead th {
+  background-color: var(--surface) !important;
+  color: var(--text-primary);
   font-weight: 600;
-  color: var(--bs-secondary-color);
   font-size: 0.78rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 2px solid var(--bs-border-color);
-  background-color: var(--bs-secondary-bg);
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1rem;
 }
 
-/* Formularios */
+.table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.table-hover tbody tr:hover,
+.table tbody tr:hover {
+  background-color: rgba(84, 122, 158, 0.08) !important;
+}
+
+.table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ==========================================================================
+   FORMULARIOS
+   ========================================================================== */
 .form-control, .form-select {
-  border-color: var(--bs-border-color);
-  font-size: 0.9rem;
-  border-radius: 8px;
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  border-radius: var(--bs-border-radius);
+  padding: 0.5rem 0.75rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control::placeholder {
+  color: #8C9CA6;
 }
 
 .form-control:focus, .form-select:focus {
-  border-color: #4F46E5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+  background-color: var(--card);
+  border-color: var(--primary);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 3px rgba(84, 122, 158, 0.18);
 }
 
 .form-label {
   font-weight: 500;
-  font-size: 0.875rem;
-  color: var(--bs-body-color);
+  font-size: 0.84rem;
+  color: var(--text-primary);
+  margin-bottom: 0.35rem;
 }
 
-/* Page header */
+/* ==========================================================================
+   PAGE HEADER & SECCIONES
+   ========================================================================== */
 .page-header {
-  border-bottom: 2px solid var(--bs-border-color);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 1rem;
   margin-bottom: 1.5rem;
 }
 
 .page-header h2 {
   font-weight: 700;
-  letter-spacing: -0.5px;
-  font-size: 1.5rem;
+  letter-spacing: -0.4px;
+  font-size: 1.45rem;
+  color: var(--text-primary);
 }
 
-/* Alertas y feedback */
+/* ==========================================================================
+   ALERTAS Y FEEDBACK
+   ========================================================================== */
 .alert {
   border-radius: var(--bs-border-radius);
   font-size: 0.875rem;
+  border: 1px solid transparent;
 }
 
-/* Carrito de nueva venta */
+.alert-success {
+  background-color: rgba(111, 155, 122, 0.15);
+  border-color: rgba(111, 155, 122, 0.35);
+  color: #2F4D35;
+}
+
+.alert-danger {
+  background-color: rgba(184, 111, 111, 0.15);
+  border-color: rgba(184, 111, 111, 0.35);
+  color: #692A2A;
+}
+
+.alert-warning {
+  background-color: rgba(184, 155, 94, 0.15);
+  border-color: rgba(184, 155, 94, 0.35);
+  color: #5C4316;
+}
+
+.alert-info {
+  background-color: rgba(111, 145, 174, 0.15);
+  border-color: rgba(111, 145, 174, 0.35);
+  color: #263E52;
+}
+
+/* ==========================================================================
+   BADGES Y COMPONENTES ESPECÍFICOS
+   ========================================================================== */
+.badge {
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 0.35em 0.65em;
+}
+
+.badge.bg-primary-subtle {
+  background-color: rgba(84, 122, 158, 0.16) !important;
+  color: var(--primary) !important;
+  border: 1px solid rgba(84, 122, 158, 0.3);
+}
+
+.badge.bg-secondary-subtle {
+  background-color: #D3DDE3 !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border);
+}
+
+.badge.bg-success-subtle {
+  background-color: rgba(111, 155, 122, 0.16) !important;
+  color: var(--color-success) !important;
+  border: 1px solid rgba(111, 155, 122, 0.3);
+}
+
 .carrito-item {
-  background: var(--bs-secondary-bg);
-  border: 2px solid var(--bs-border-color);
-  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--bs-border-radius);
   padding: 0.75rem 1rem;
 }
 
-/* Badge */
-.badge {
-  font-weight: 500;
+.detalle-venta {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--bs-border-radius);
+  padding: 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
 }
 
-/* Spinner */
 .spinner-overlay {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 200px;
-}
-
-/* Detalle de venta expandible */
-.detalle-venta {
-  background-color: var(--bs-secondary-bg);
-  border-radius: 10px;
-  padding: 1rem;
-  margin-top: 0.5rem;
-  font-size: 0.85rem;
 }

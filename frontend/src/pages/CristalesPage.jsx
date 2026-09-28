@@ -210,27 +210,30 @@ export default function CristalesPage() {
           <option value="Ocupacional">Ocupacional</option>
           <option value="Stock">Stock</option>
         </select>
-        <div className="input-group" style={{ flex: 1, minWidth: '200px' }}>
-          <span className="input-group-text bg-white border-end-0">
-            <i className="bi bi-search text-secondary"></i>
-          </span>
+        <div className="search-box" style={{ flex: 1, minWidth: '200px' }}>
+          <i className="bi bi-search search-icon"></i>
           <input
             type="text"
             name="tratamiento"
-            className="form-control border-start-0"
+            className="search-input"
             placeholder="Buscar por tratamiento o descripción..."
             value={filtros.tratamiento}
             onChange={handleFiltroChange}
           />
           {filtros.tratamiento && (
-            <button className="btn btn-outline-secondary" onClick={() => setFiltros({...filtros, tratamiento: ''})}>
-              <i className="bi bi-x"></i>
+            <button
+              type="button"
+              className="search-clear-btn"
+              onClick={() => setFiltros({...filtros, tratamiento: ''})}
+              title="Borrar búsqueda"
+            >
+              <i className="bi bi-x-lg"></i>
             </button>
           )}
         </div>
       </div>
 
-      <div className="card">
+      <div className="card overflow-hidden">
         {cargando ? (
           <div className="spinner-overlay">
             <div className="spinner-border text-primary" role="status">

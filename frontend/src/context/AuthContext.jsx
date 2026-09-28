@@ -1,61 +1,56 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { loginApi, getPerfilApi } from '../api/auth.api';
+import { getPerfilApi } from '../api/auth.api';
 
 export const AuthContext = createContext(null);
 
+const DEFAULT_USER = {
+  id: 1,
+  username: 'admin',
+  nombre: 'Administrador',
+  rol: 'admin'
+};
+
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('token') || null);
+  const [token, setToken] = useState(() => localStorage.getItem('token') || 'local-session-active');
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('usuario');
-    return savedUser ? JSON.parse(savedUser) : null;
+    return savedUser ? JSON.parse(savedUser) : DEFAULT_USER;
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function verificarSesion() {
-      const storedToken = localStorage.getItem('token');
-      if (storedToken) {
-        try {
-          const perfil = await getPerfilApi();
+    async function sincronizarPerfil() {
+      try {
+        const perfil = await getPerfilApi();
+        if (perfil) {
           setUser(perfil);
           localStorage.setItem('usuario', JSON.stringify(perfil));
-        } catch {
-          // Si el token es inválido o expiró, limpiamos la sesión
-          localStorage.removeItem('token');
-          localStorage.removeItem('usuario');
-          setToken(null);
-          setUser(null);
         }
+      } catch {
+        if (!user) setUser(DEFAULT_USER);
       }
-      setLoading(false);
     }
-
-    verificarSesion();
+    sincronizarPerfil();
   }, []);
 
-  const login = async (username, password) => {
-    const data = await loginApi({ username, password });
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('usuario', JSON.stringify(data.usuario));
-    setToken(data.token);
-    setUser(data.usuario);
-    return data;
+  const login = async () => {
+    setUser(DEFAULT_USER);
+    setToken('local-session-active');
+    return { token: 'local-session-active', usuario: DEFAULT_USER };
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('usuario');
-    setToken(null);
-    setUser(null);
+    setUser(DEFAULT_USER);
+    setToken('local-session-active');
   };
 
   const value = {
-    user,
-    token,
-    loading,
-    isAuthenticated: Boolean(token && user),
-    isAdmin: user?.rol === 'admin',
-    isVendedor: user?.rol === 'vendedor',
+    user: user || DEFAULT_USER,
+    token: token || 'local-session-active',
+    loading: false,
+    isAuthenticated: true,
+    isAdmin: true,
+    isVendedor: false,
     login,
     logout
   };

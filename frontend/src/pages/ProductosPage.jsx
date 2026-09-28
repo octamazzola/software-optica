@@ -144,20 +144,23 @@ export default function ProductosPage() {
       )}
 
       <div className="mb-3 d-flex gap-2">
-        <div className="input-group" style={{ flex: 1 }}>
-          <span className="input-group-text bg-white border-end-0">
-            <i className="bi bi-search text-secondary"></i>
-          </span>
+        <div className="search-box" style={{ flex: 1 }}>
+          <i className="bi bi-search search-icon"></i>
           <input
             type="text"
-            className="form-control border-start-0"
+            className="search-input"
             placeholder="Buscar por nombre o código..."
             value={buscar}
             onChange={(e) => setBuscar(e.target.value)}
           />
           {buscar && (
-            <button className="btn btn-outline-secondary" onClick={() => setBuscar('')}>
-              <i className="bi bi-x"></i>
+            <button
+              type="button"
+              className="search-clear-btn"
+              onClick={() => setBuscar('')}
+              title="Borrar búsqueda"
+            >
+              <i className="bi bi-x-lg"></i>
             </button>
           )}
         </div>
@@ -174,7 +177,7 @@ export default function ProductosPage() {
         </select>
       </div>
 
-      <div className="card">
+      <div className="card overflow-hidden">
         {cargando ? (
           <div className="spinner-overlay">
             <div className="spinner-border text-primary" role="status">

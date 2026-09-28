@@ -2,8 +2,16 @@ import VentaService from "../services/venta.service.js";
 
 const VentaController = {
     async obtenerVentas(req, res) {
-        const { dni, cliente_id } = req.query;
-        const ventas = await VentaService.obtenerVentas(dni, cliente_id);
+        const { dni, cliente_id, buscar, nombre, apellido, fechaDesde, fechaHasta } = req.query;
+        const ventas = await VentaService.obtenerVentas({
+            dni,
+            cliente_id,
+            buscar,
+            nombre,
+            apellido,
+            fechaDesde,
+            fechaHasta
+        });
         res.json(ventas);
     },
 

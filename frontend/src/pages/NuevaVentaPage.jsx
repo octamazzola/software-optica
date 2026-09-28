@@ -225,12 +225,12 @@ export default function NuevaVentaPage() {
         {/* Panel izquierdo */}
         <div className="col-lg-7">
           {/* Selección de cliente */}
-          <div className="card mb-3">
-            <div className="card-header d-flex align-items-center gap-2">
-              <i className="bi bi-person-check text-primary"></i>
-              Cliente
+          <div className="card mb-4">
+            <div className="card-header d-flex align-items-center gap-2 py-3 px-3">
+              <i className="bi bi-person-check text-primary fs-5"></i>
+              <span className="fw-semibold">Cliente</span>
             </div>
-            <div className="card-body">
+            <div className="card-body p-3">
               {clienteSeleccionado ? (
                 <div className="d-flex align-items-center justify-content-between p-3 border rounded-3 bg-light">
                   <div>
@@ -246,20 +246,28 @@ export default function NuevaVentaPage() {
                 </div>
               ) : (
                 <>
-                  <div className="input-group mb-3">
-                    <span className="input-group-text bg-white border-end-0">
-                      <i className="bi bi-search text-secondary"></i>
-                    </span>
+                  <div className="search-box">
+                    <i className="bi bi-search search-icon"></i>
                     <input
                       type="text"
-                      className="form-control border-start-0"
+                      className="search-input"
                       placeholder="Buscar cliente por DNI, nombre o apellido..."
                       value={clienteBuscar}
                       onChange={(e) => setClienteBuscar(e.target.value)}
                     />
+                    {clienteBuscar && (
+                      <button
+                        type="button"
+                        className="search-clear-btn"
+                        onClick={() => setClienteBuscar('')}
+                        title="Borrar"
+                      >
+                        <i className="bi bi-x-lg"></i>
+                      </button>
+                    )}
                   </div>
                   {clienteBuscar && (
-                    <div className="border rounded-3 overflow-hidden mb-3" style={{ maxHeight: 200, overflowY: 'auto' }}>
+                    <div className="border rounded-3 overflow-hidden mt-2 mb-1" style={{ maxHeight: 200, overflowY: 'auto' }}>
                       {clientesFiltrados.length === 0 ? (
                         <div className="text-secondary text-center py-3" style={{ fontSize: '0.875rem' }}>
                           No se encontraron clientes.
@@ -271,7 +279,7 @@ export default function NuevaVentaPage() {
                             type="button"
                             className="w-100 text-start px-3 py-2 border-0 border-bottom bg-white"
                             style={{ transition: 'background 0.15s' }}
-                            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FAFAFA'}
+                            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--surface)'}
                             onMouseLeave={e => e.currentTarget.style.backgroundColor = '#fff'}
                             onClick={() => setClienteSeleccionado(c)}
                           >
@@ -289,34 +297,50 @@ export default function NuevaVentaPage() {
 
           {/* Catálogo mixto */}
           <div className="card">
-            <div className="card-header p-0">
-                <ul className="nav nav-tabs card-header-tabs m-0 p-2 border-bottom-0">
+            <div className="card-header px-3 py-2">
+                <ul className="nav card-header-tabs m-0 border-0">
                     <li className="nav-item">
-                        <button className={`nav-link ${tabActivo === 'productos' ? 'active' : ''}`} onClick={() => setTabActivo('productos')}>
+                        <button 
+                            type="button"
+                            className={`nav-link ${tabActivo === 'productos' ? 'active' : ''}`} 
+                            onClick={() => setTabActivo('productos')}
+                        >
                             <i className="bi bi-box me-1"></i> Armazones / Accesorios
                         </button>
                     </li>
                     <li className="nav-item">
-                        <button className={`nav-link ${tabActivo === 'cristales' ? 'active' : ''}`} onClick={() => setTabActivo('cristales')}>
+                        <button 
+                            type="button"
+                            className={`nav-link ${tabActivo === 'cristales' ? 'active' : ''}`} 
+                            onClick={() => setTabActivo('cristales')}
+                        >
                             <i className="bi bi-eye me-1"></i> Cristales
                         </button>
                     </li>
                 </ul>
             </div>
-            <div className="card-body">
+            <div className="card-body p-3">
                 {tabActivo === 'productos' ? (
                     <>
-                      <div className="input-group mb-3">
-                        <span className="input-group-text bg-white border-end-0">
-                          <i className="bi bi-search text-secondary"></i>
-                        </span>
+                      <div className="search-box mb-3">
+                        <i className="bi bi-search search-icon"></i>
                         <input
                           type="text"
-                          className="form-control border-start-0"
+                          className="search-input"
                           placeholder="Buscar producto por nombre o código..."
                           value={productoBuscar}
                           onChange={(e) => setProductoBuscar(e.target.value)}
                         />
+                        {productoBuscar && (
+                          <button
+                            type="button"
+                            className="search-clear-btn"
+                            onClick={() => setProductoBuscar('')}
+                            title="Borrar"
+                          >
+                            <i className="bi bi-x-lg"></i>
+                          </button>
+                        )}
                       </div>
 
                       {productoBuscar && (
@@ -332,7 +356,7 @@ export default function NuevaVentaPage() {
                                 type="button"
                                 className="w-100 text-start px-3 py-2 border-0 border-bottom bg-white"
                                 style={{ transition: 'background 0.15s' }}
-                                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FAFAFA'}
+                                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--surface)'}
                                 onMouseLeave={e => e.currentTarget.style.backgroundColor = '#fff'}
                                 onClick={() => agregarAlCarrito(p, 'producto', p.precio)}
                               >
@@ -352,7 +376,7 @@ export default function NuevaVentaPage() {
                       )}
 
                       {!productoBuscar && productosMasVendidos.length > 0 && (
-                        <div className="mt-4">
+                        <div className="mt-3">
                           <h6 className="text-secondary mb-3" style={{ fontSize: '0.875rem' }}>
                             <i className="bi bi-star-fill text-warning me-2"></i>
                             Más vendidos
@@ -376,17 +400,25 @@ export default function NuevaVentaPage() {
                     </>
                 ) : (
                     <>
-                        <div className="input-group mb-3">
-                            <span className="input-group-text bg-white border-end-0">
-                                <i className="bi bi-search text-secondary"></i>
-                            </span>
+                        <div className="search-box mb-3">
+                            <i className="bi bi-search search-icon"></i>
                             <input
                                 type="text"
-                                className="form-control border-start-0"
+                                className="search-input"
                                 placeholder="Buscar por material, tratamiento o descripción..."
                                 value={cristalBuscar}
                                 onChange={(e) => setCristalBuscar(e.target.value)}
                             />
+                            {cristalBuscar && (
+                              <button
+                                type="button"
+                                className="search-clear-btn"
+                                onClick={() => setCristalBuscar('')}
+                                title="Borrar"
+                              >
+                                <i className="bi bi-x-lg"></i>
+                              </button>
+                            )}
                         </div>
                         
                         <div className="border rounded-3 overflow-hidden" style={{ maxHeight: 350, overflowY: 'auto' }}>
@@ -452,11 +484,13 @@ export default function NuevaVentaPage() {
         {/* Panel derecho — Carrito */}
         <div className="col-lg-5">
           <div className="card" style={{ position: 'sticky', top: '80px' }}>
-            <div className="card-header d-flex align-items-center gap-2">
-              <i className="bi bi-cart3 text-primary"></i>
-              Resumen de Venta
+            <div className="card-header d-flex align-items-center justify-content-between py-3 px-3">
+              <div className="d-flex align-items-center gap-2">
+                <i className="bi bi-cart3 text-primary fs-5"></i>
+                <span className="fw-semibold">Resumen de Venta</span>
+              </div>
               {carrito.length > 0 && (
-                <span className="badge bg-primary ms-auto">{carrito.length}</span>
+                <span className="badge bg-primary">{carrito.length}</span>
               )}
             </div>
             <div className="card-body p-3">
@@ -558,22 +592,24 @@ export default function NuevaVentaPage() {
       </div>
 
       {/* Tercer Bloque: Graduación de Lentes (Nota de Pedido) a todo lo ancho */}
-      <div className="card mt-4">
-        <div className="card-header d-flex align-items-center justify-content-between py-3">
+      <div className="row mt-4">
+        <div className="col-12">
+          <div className="card">
+        <div className="card-header d-flex align-items-center justify-content-between py-3 px-3">
           <div className="d-flex align-items-center gap-2">
             <i className="bi bi-file-earmark-medical text-primary fs-5"></i>
-            <span className="fw-bold">Graduación de Lentes (Nota de Pedido)</span>
+            <span className="fw-semibold">Graduación de Lentes (Nota de Pedido)</span>
           </div>
-          <div className="form-check form-switch m-0">
+          <div className="form-check form-switch m-0 d-flex align-items-center gap-2">
             <input
               className="form-check-input"
               type="checkbox"
               id="checkGraduacion"
               checked={incluyeGraduacion}
               onChange={(e) => setIncluyeGraduacion(e.target.checked)}
-              style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
+              style={{ cursor: 'pointer' }}
             />
-            <label className="form-check-label fw-500 ms-2 text-dark" htmlFor="checkGraduacion" style={{ cursor: 'pointer' }}>
+            <label className="form-check-label fw-500 m-0" htmlFor="checkGraduacion" style={{ cursor: 'pointer', color: 'var(--text-primary)' }}>
               Esta venta incluye graduación de lentes
             </label>
           </div>
@@ -792,6 +828,8 @@ export default function NuevaVentaPage() {
             </div>
           </div>
         )}
+          </div>
+        </div>
       </div>
     </div>
   );

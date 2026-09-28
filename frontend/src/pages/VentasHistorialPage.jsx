@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { obtenerVentas, obtenerVentaPorId } from '../api/ventas.api';
 import { Link } from 'react-router-dom';
 import TablaGraduacionDetalle from '../components/TablaGraduacionDetalle';
@@ -7,7 +7,9 @@ export default function VentasHistorialPage() {
   const [ventas, setVentas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
-  const [dniBuscar, setDniBuscar] = useState('');
+  const [terminoBuscar, setTerminoBuscar] = useState('');
+  const [fechaDesde, setFechaDesde] = useState('');
+  const [fechaHasta, setFechaHasta] = useState('');
   const [ventaExpandida, setVentaExpandida] = useState(null);
   const [detalleData, setDetalleData] = useState(null);
   const [cargandoDetalle, setCargandoDetalle] = useState(false);
@@ -15,7 +17,11 @@ export default function VentasHistorialPage() {
   useEffect(() => {
     const cargar = async () => {
       try {
-        const data = await obtenerVentas(dniBuscar);
+        const data = await obtenerVentas({
+          buscar: terminoBuscar.trim(),
+          fechaDesde: fechaDesde || undefined,
+          fechaHasta: fechaHasta || undefined
+        });
         setVentas(data);
       } catch {
         setError('No se pudo cargar el historial de ventas.');
@@ -26,7 +32,7 @@ export default function VentasHistorialPage() {
     
     const timer = setTimeout(() => cargar(), 300);
     return () => clearTimeout(timer);
-  }, [dniBuscar]);
+  }, [terminoBuscar, fechaDesde, fechaHasta]);
 
   const toggleDetalle = async (venta) => {
     if (ventaExpandida === venta.id) {
@@ -58,6 +64,47 @@ export default function VentasHistorialPage() {
     });
   };
 
+  const formatearFechaISO = (d) => {
+    const anio = d.getFullYear();
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    const dia = String(d.getDate()).padStart(2, '0');
+    return `${anio}-${mes}-${dia}`;
+  };
+
+  const setRangoHoy = () => {
+    const hoy = formatearFechaISO(new Date());
+    setFechaDesde(hoy);
+    setFechaHasta(hoy);
+  };
+
+  const setRangoEsteMes = () => {
+    const ahora = new Date();
+    const primerDia = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+    const ultimoDia = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0);
+    setFechaDesde(formatearFechaISO(primerDia));
+    setFechaHasta(formatearFechaISO(ultimoDia));
+  };
+
+  const setRangoMesPasado = () => {
+    const ahora = new Date();
+    const primerDia = new Date(ahora.getFullYear(), ahora.getMonth() - 1, 1);
+    const ultimoDia = new Date(ahora.getFullYear(), ahora.getMonth(), 0);
+    setFechaDesde(formatearFechaISO(primerDia));
+    setFechaHasta(formatearFechaISO(ultimoDia));
+  };
+
+  const limpiarFiltros = () => {
+    setTerminoBuscar('');
+    setFechaDesde('');
+    setFechaHasta('');
+  };
+
+  const totalMonto = useMemo(() => {
+    return ventas.reduce((acc, v) => acc + (Number(v.total) || 0), 0);
+  }, [ventas]);
+
+  const hayFiltrosActivos = Boolean(terminoBuscar || fechaDesde || fechaHasta);
+
   if (cargando) {
     return (
       <div className="spinner-overlay">
@@ -70,17 +117,24 @@ export default function VentasHistorialPage() {
 
   return (
     <div>
-      <div className="page-header d-flex align-items-center justify-content-between">
+      <div className="page-header d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
-          <h2><i className="bi bi-receipt me-2 text-primary"></i>Historial de Ventas</h2>
+          <h2 className="mb-1"><i className="bi bi-receipt me-2 text-primary"></i>Historial de Ventas</h2>
           <p className="text-secondary mb-0" style={{ fontSize: '0.875rem' }}>
-            {ventas.length} venta{ventas.length !== 1 ? 's' : ''} registrada{ventas.length !== 1 ? 's' : ''}
+            {ventas.length} venta{ventas.length !== 1 ? 's' : ''} encontrada{ventas.length !== 1 ? 's' : ''}
+            {hayFiltrosActivos && <span className="badge bg-secondary ms-2">Filtros aplicados</span>}
           </p>
         </div>
-        <Link to="/nueva-venta" className="btn btn-primary d-flex align-items-center gap-2">
-          <i className="bi bi-plus-lg"></i>
-          Nueva venta
-        </Link>
+        <div className="d-flex align-items-center gap-3">
+          <div className="text-end d-none d-sm-block bg-white px-3 py-2 rounded shadow-sm border">
+            <div className="small text-secondary" style={{ fontSize: '0.75rem' }}>Total facturado</div>
+            <div className="fw-bold text-primary" style={{ fontSize: '1.2rem' }}>{formatearPrecio(totalMonto)}</div>
+          </div>
+          <Link to="/nueva-venta" className="btn btn-primary d-flex align-items-center gap-2">
+            <i className="bi bi-plus-lg"></i>
+            Nueva venta
+          </Link>
+        </div>
       </div>
 
       {error && (
@@ -90,39 +144,150 @@ export default function VentasHistorialPage() {
         </div>
       )}
 
-      <div className="mb-3">
-        <div className="input-group">
-          <span className="input-group-text bg-white border-end-0">
-            <i className="bi bi-search text-secondary"></i>
+      {/* Tarjeta de Búsqueda y Filtros de Fecha */}
+      <div className="card shadow-sm border-0 mb-4 p-3" style={{ backgroundColor: '#ffffff' }}>
+        <div className="row g-3 align-items-end">
+          {/* Búsqueda por cliente */}
+          <div className="col-12 col-lg-5">
+            <label className="form-label small fw-semibold text-secondary mb-1">
+              <i className="bi bi-person-search me-1"></i>Cliente (Nombre, Apellido o DNI)
+            </label>
+            <div className="search-box">
+              <i className="bi bi-search search-icon"></i>
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Buscar por cliente o DNI..."
+                value={terminoBuscar}
+                onChange={(e) => setTerminoBuscar(e.target.value)}
+              />
+              {terminoBuscar && (
+                <button
+                  className="search-clear-btn"
+                  type="button"
+                  onClick={() => setTerminoBuscar('')}
+                  title="Borrar texto"
+                >
+                  <i className="bi bi-x-lg"></i>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Rango Desde */}
+          <div className="col-6 col-sm-6 col-lg-3">
+            <label className="form-label small fw-semibold text-secondary mb-1">
+              <i className="bi bi-calendar-event me-1"></i>Fecha Desde
+            </label>
+            <input
+              type="date"
+              className="form-control"
+              value={fechaDesde}
+              onChange={(e) => setFechaDesde(e.target.value)}
+            />
+          </div>
+
+          {/* Rango Hasta */}
+          <div className="col-6 col-sm-6 col-lg-3">
+            <label className="form-label small fw-semibold text-secondary mb-1">
+              <i className="bi bi-calendar-event me-1"></i>Fecha Hasta
+            </label>
+            <input
+              type="date"
+              className="form-control"
+              value={fechaHasta}
+              onChange={(e) => setFechaHasta(e.target.value)}
+            />
+          </div>
+
+          {/* Botón reset en columna */}
+          <div className="col-12 col-lg-1 d-flex">
+            {hayFiltrosActivos ? (
+              <button
+                className="btn btn-outline-danger w-100"
+                onClick={limpiarFiltros}
+                title="Limpiar filtros"
+              >
+                <i className="bi bi-arrow-counterclockwise"></i>
+              </button>
+            ) : (
+              <button
+                className="btn btn-outline-secondary w-100 disabled opacity-25"
+                disabled
+              >
+                <i className="bi bi-filter"></i>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Atajos rápidos de fecha */}
+        <div className="d-flex flex-wrap align-items-center gap-2 mt-3 pt-2 border-top">
+          <span className="small text-secondary fw-semibold me-1">
+            <i className="bi bi-lightning-charge me-1"></i>Atajos de fecha:
           </span>
-          <input
-            type="text"
-            className="form-control border-start-0"
-            placeholder="Buscar ventas por DNI del cliente..."
-            value={dniBuscar}
-            onChange={(e) => setDniBuscar(e.target.value)}
-            style={{ borderRadius: '0 8px 8px 0' }}
-          />
-          {dniBuscar && (
-            <button className="btn btn-outline-secondary border-start-0" onClick={() => setDniBuscar('')}>
-              <i className="bi bi-x"></i>
+          <button
+            type="button"
+            className={`btn btn-sm py-0 px-2 ${fechaDesde === formatearFechaISO(new Date()) && fechaHasta === formatearFechaISO(new Date()) ? 'btn-primary' : 'btn-outline-secondary'}`}
+            style={{ fontSize: '0.78rem' }}
+            onClick={setRangoHoy}
+          >
+            Hoy
+          </button>
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-secondary py-0 px-2"
+            style={{ fontSize: '0.78rem' }}
+            onClick={setRangoEsteMes}
+          >
+            Este mes
+          </button>
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-secondary py-0 px-2"
+            style={{ fontSize: '0.78rem' }}
+            onClick={setRangoMesPasado}
+          >
+            Mes pasado
+          </button>
+          {hayFiltrosActivos && (
+            <button
+              type="button"
+              className="btn btn-sm btn-link text-decoration-none text-danger py-0 px-1 ms-auto"
+              style={{ fontSize: '0.78rem' }}
+              onClick={limpiarFiltros}
+            >
+              <i className="bi bi-x-circle me-1"></i>Restablecer filtros
             </button>
           )}
         </div>
       </div>
 
       {ventas.length === 0 && !error ? (
-        <div className="card">
+        <div className="card overflow-hidden">
           <div className="text-center py-5 text-secondary">
-            <i className="bi bi-receipt fs-1 d-block mb-2 opacity-25"></i>
-            <div>Aún no hay ventas registradas.</div>
-            <Link to="/nueva-venta" className="btn btn-primary btn-sm mt-3">
-              Registrar primera venta
-            </Link>
+            {hayFiltrosActivos ? (
+              <>
+                <i className="bi bi-search fs-1 d-block mb-2 opacity-25"></i>
+                <div className="fw-semibold">No se encontraron ventas con los filtros aplicados.</div>
+                <div className="small text-muted mt-1">Probá cambiando el nombre, DNI o el rango de fechas.</div>
+                <button className="btn btn-outline-primary btn-sm mt-3" onClick={limpiarFiltros}>
+                  Limpiar filtros
+                </button>
+              </>
+            ) : (
+              <>
+                <i className="bi bi-receipt fs-1 d-block mb-2 opacity-25"></i>
+                <div>Aún no hay ventas registradas.</div>
+                <Link to="/nueva-venta" className="btn btn-primary btn-sm mt-3">
+                  Registrar primera venta
+                </Link>
+              </>
+            )}
           </div>
         </div>
       ) : (
-        <div className="card">
+        <div className="card overflow-hidden">
           <div className="table-responsive">
             <table className="table table-hover align-middle mb-0">
               <thead>

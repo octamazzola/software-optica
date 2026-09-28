@@ -1,7 +1,13 @@
 import { dbQuery, dbRun } from '../config/db.js';
 
 const VentaRepository = {
-    async obtenerTodas(dni = '', cliente_id = null) {
+    async obtenerTodas(filtros = {}) {
+        let paramsObj = filtros;
+        if (typeof filtros === 'string') {
+            paramsObj = { dni: filtros, cliente_id: arguments[1] || null };
+        }
+        const { dni, cliente_id, buscar, nombre, apellido, fechaDesde, fechaHasta } = paramsObj || {};
+
         let sql = `
             select v.*, c.nombre as cliente_nombre, c.apellido as cliente_apellido, c.dni as cliente_dni
             from ventas v join clientes c on v.cliente_id = c.id
@@ -9,13 +15,42 @@ const VentaRepository = {
         `;
         const params = [];
 
-        if (dni) {
-            sql += ` AND c.dni LIKE ?`;
-            params.push(`%${dni}%`);
+        // Búsqueda flexible por texto: nombre, apellido, combinación o DNI
+        if (buscar && buscar.trim()) {
+            const term = `%${buscar.trim()}%`;
+            sql += ` AND (c.nombre LIKE ? OR c.apellido LIKE ? OR (c.nombre || ' ' || c.apellido) LIKE ? OR (c.apellido || ' ' || c.nombre) LIKE ? OR c.dni LIKE ?)`;
+            params.push(term, term, term, term, term);
         }
+
+        if (dni && dni.trim()) {
+            sql += ` AND c.dni LIKE ?`;
+            params.push(`%${dni.trim()}%`);
+        }
+
+        if (nombre && nombre.trim()) {
+            sql += ` AND c.nombre LIKE ?`;
+            params.push(`%${nombre.trim()}%`);
+        }
+
+        if (apellido && apellido.trim()) {
+            sql += ` AND c.apellido LIKE ?`;
+            params.push(`%${apellido.trim()}%`);
+        }
+
         if (cliente_id) {
             sql += ` AND v.cliente_id = ?`;
             params.push(cliente_id);
+        }
+
+        // Filtro por rango de fechas (YYYY-MM-DD)
+        if (fechaDesde && fechaDesde.trim()) {
+            sql += ` AND date(v.fecha) >= ?`;
+            params.push(fechaDesde.trim());
+        }
+
+        if (fechaHasta && fechaHasta.trim()) {
+            sql += ` AND date(v.fecha) <= ?`;
+            params.push(fechaHasta.trim());
         }
 
         sql += ` order by v.fecha desc`;

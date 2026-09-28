@@ -7,8 +7,12 @@ import { dbRun } from '../config/db.js';
 
 const VentaService = {
 
-    async obtenerVentas(dni = '', cliente_id = null) {
-        const ventas = await VentaRepository.obtenerTodas(dni, cliente_id);
+    async obtenerVentas(filtros = {}) {
+        let paramsObj = filtros;
+        if (typeof filtros === 'string') {
+            paramsObj = { dni: filtros, cliente_id: arguments[1] || null };
+        }
+        const ventas = await VentaRepository.obtenerTodas(paramsObj);
         if (ventas.length === 0) return [];
         
         const ventaIds = ventas.map(v => v.id);
