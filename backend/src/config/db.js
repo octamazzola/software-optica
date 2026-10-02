@@ -210,6 +210,13 @@ export const inicializarBaseDeDatos = async () => {
       )
     `);
 
+        await dbRun(`
+      CREATE TABLE IF NOT EXISTS configuracion (
+        clave TEXT PRIMARY KEY,
+        valor TEXT
+      )
+    `);
+
         console.log('✅ Esquema de base de datos verificado/creado con éxito.');
         await cargarDatosSemilla();
 
@@ -219,18 +226,37 @@ export const inicializarBaseDeDatos = async () => {
 };
 
 async function cargarDatosSemilla() {
-    const resultado = await dbQuery('SELECT COUNT(*) as cantidad FROM clientes');
-    // En Postgres "cantidad" vuelve como string si count es bigint, por eso parseamos
-    const count = parseInt(resultado[0].cantidad, 10);
+    // Verificar si la inicialización de datos de muestra ya fue realizada previamente
+    const configSemilla = await dbQuery("SELECT valor FROM configuracion WHERE clave = 'datos_semilla_cargados'");
+    const yaInicializado = configSemilla.length > 0 && configSemilla[0].valor === '1';
 
-    if (count === 0) {
-        console.log('🌱 Base de datos vacía. Cargando datos de muestra...');
-        await dbRun("INSERT INTO clientes (nombre, apellido, dni, telefono, email) VALUES ('Juan', 'Pérez', '10000000', '555-0199', 'juan.perez@email.com')");
-        await dbRun("INSERT INTO clientes (nombre, apellido, dni, telefono, email) VALUES ('María', 'Gómez', '10000001', '555-0144', 'maria.gomez@email.com')");
-        await dbRun("INSERT INTO productos (codigo, nombre, descripcion, precio, categoria) VALUES ('ARM-001', 'Armazón Ray-Ban Clubmaster', 'Estilo clásico retro de acetato.', 12500, 'Armazón de Sol')");
-        await dbRun("INSERT INTO productos (codigo, nombre, descripcion, precio, categoria) VALUES ('LEN-002', 'Par de Cristales Antireflejo', 'Tratamiento protector de luz artificial.', 8000, 'Accesorio')");
-        await dbRun("INSERT INTO productos (codigo, nombre, descripcion, precio, categoria) VALUES ('EST-003', 'Estuche Rígido con Microfibra', 'Protección clásica para anteojos.', 1500, 'Accesorio')");
-        console.log('🌱 Datos semilla cargados correctamente.');
+    if (!yaInicializado) {
+        const usuariosCount = await dbQuery('SELECT COUNT(*) as cantidad FROM usuarios');
+        const clientesCount = await dbQuery('SELECT COUNT(*) as cantidad FROM clientes');
+        const productosCount = await dbQuery('SELECT COUNT(*) as cantidad FROM productos');
+
+        const hayDatosPrevios = 
+            parseInt(usuariosCount[0].cantidad, 10) > 0 ||
+            parseInt(clientesCount[0].cantidad, 10) > 0 ||
+            parseInt(productosCount[0].cantidad, 10) > 0;
+
+        // Solo cargar datos de muestra si la base de datos es 100% virgen (primera ejecución)
+        if (!hayDatosPrevios) {
+            console.log('🌱 Base de datos vacía. Cargando datos de muestra iniciales...');
+            await dbRun("INSERT INTO clientes (nombre, apellido, dni, telefono, email) VALUES ('Juan', 'Pérez', '10000000', '555-0199', 'juan.perez@email.com')");
+            await dbRun("INSERT INTO clientes (nombre, apellido, dni, telefono, email) VALUES ('María', 'Gómez', '10000001', '555-0144', 'maria.gomez@email.com')");
+            await dbRun("INSERT INTO productos (codigo, nombre, descripcion, precio, categoria) VALUES ('ARM-001', 'Armazón Ray-Ban Clubmaster', 'Estilo clásico retro de acetato.', 12500, 'Armazón de Sol')");
+            await dbRun("INSERT INTO productos (codigo, nombre, descripcion, precio, categoria) VALUES ('LEN-002', 'Par de Cristales Antireflejo', 'Tratamiento protector de luz artificial.', 8000, 'Accesorio')");
+            await dbRun("INSERT INTO productos (codigo, nombre, descripcion, precio, categoria) VALUES ('EST-003', 'Estuche Rígido con Microfibra', 'Protección clásica para anteojos.', 1500, 'Accesorio')");
+            console.log('🌱 Datos semilla cargados correctamente.');
+        }
+
+        // Marcar de forma permanente que la inicialización ya se efectuó
+        if (usePostgres) {
+            await dbRun("INSERT INTO configuracion (clave, valor) VALUES ('datos_semilla_cargados', '1') ON CONFLICT (clave) DO NOTHING");
+        } else {
+            await dbRun("INSERT OR IGNORE INTO configuracion (clave, valor) VALUES ('datos_semilla_cargados', '1')");
+        }
     }
 
     const usuariosCount = await dbQuery('SELECT COUNT(*) as cantidad FROM usuarios');

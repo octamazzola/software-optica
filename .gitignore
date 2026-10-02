@@ -1,6 +1,10 @@
 # Logs y base de datos
 database.sqlite
 backend/database.sqlite
+*.sqlite
+*.sqlite-journal
+*.log
+
 node_modules/
 backend/node_modules/
 frontend/node_modules/
